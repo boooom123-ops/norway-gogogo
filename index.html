@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2027 挪威极圈山海追光之旅</title>
+    <title>2027 挪威极圈山海追光之旅 - 极光小队中心</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         /* =========================================
            高级星空粉紫蓝黑 Theme (Deep Cyber Galaxy)
@@ -26,6 +30,7 @@
             --pink-accent: #FF55AA;        /* 极光霓虹粉 */
             --purple-accent: #9D4EDD;      /* 璀璨星体紫 */
             --blue-accent: #00F0FF;        /* 电光极冰蓝 */
+            --green-accent: #00FFAB;       /* 极光荧光绿 */
 
             /* 渐变组合 */
             --grad-cyber-title: linear-gradient(135deg, #FF66C4 0%, #B5179E 45%, #00F0FF 100%);
@@ -35,17 +40,23 @@
             /* 高级发光阴影 */
             --glow-pink: 0 0 20px rgba(255, 85, 170, 0.35);
             --glow-blue: 0 0 20px rgba(0, 240, 255, 0.35);
+            --glow-green: 0 0 20px rgba(0, 255, 171, 0.35);
             --glow-card: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(157, 78, 221, 0.15);
             --glow-card-hover: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.3);
 
             --radius-lg: 18px;
             --radius-md: 12px;
+            --radius-sm: 8px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -69,7 +80,6 @@
             pointer-events: none;
         }
 
-        /* 动态发光星云光斑 */
         .nebula {
             position: fixed;
             border-radius: 50%;
@@ -80,38 +90,77 @@
             animation: pulseNebula 12s infinite alternate ease-in-out;
         }
 
-        .nebula-pink {
-            top: -10%;
-            left: 10%;
-            width: 500px;
-            height: 500px;
-            background: var(--pink-accent);
-        }
-
-        .nebula-blue {
-            bottom: 20%;
-            right: -5%;
-            width: 600px;
-            height: 600px;
-            background: var(--blue-accent);
-        }
-
-        .nebula-purple {
-            top: 40%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 700px;
-            height: 500px;
-            background: var(--purple-accent);
-        }
+        .nebula-pink { top: -10%; left: 10%; width: 500px; height: 500px; background: var(--pink-accent); }
+        .nebula-blue { bottom: 20%; right: -5%; width: 600px; height: 600px; background: var(--blue-accent); }
+        .nebula-purple { top: 40%; left: 50%; transform: translateX(-50%); width: 700px; height: 500px; background: var(--purple-accent); }
 
         @keyframes pulseNebula {
             0% { transform: scale(1) translate(0, 0); opacity: 0.22; }
             100% { transform: scale(1.15) translate(20px, 15px); opacity: 0.35; }
         }
 
+        /* ---------------- 吸顶导航栏 Navbar ---------------- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(5, 6, 10, 0.75);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1050px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+        }
+
+        .nav-logo {
+            font-size: 1.15em;
+            font-weight: 800;
+            background: var(--grad-cyber-title);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #fff;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+        }
+
         .container {
-            max-width: 960px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 20px;
             position: relative;
@@ -120,7 +169,7 @@
 
         /* ---------------- Header 标题区 ---------------- */
         header {
-            padding: 55px 20px 35px;
+            padding: 45px 20px 30px;
             text-align: center;
         }
 
@@ -153,27 +202,27 @@
 
         .header-sub {
             color: var(--text-sub);
-            font-size: 1.15em;
+            font-size: 1.1em;
             font-weight: 500;
             letter-spacing: 0.5px;
         }
 
-        /* ---------------- Dashboard 顶部信息面板 ---------------- */
+        /* ---------------- Dashboard 看板 ---------------- */
         .dashboard-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 18px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 35px;
         }
 
         .dash-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            padding: 18px 22px;
+            padding: 16px 20px;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             box-shadow: var(--glow-card);
             backdrop-filter: blur(12px);
             transition: all 0.3s ease;
@@ -186,40 +235,42 @@
         }
 
         .dash-icon {
-            font-size: 1.8em;
+            font-size: 1.6em;
             background: rgba(0, 240, 255, 0.1);
             border: 1px solid rgba(0, 240, 255, 0.3);
-            width: 50px;
-            height: 50px;
+            width: 46px;
+            height: 46px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--blue-accent);
+            flex-shrink: 0;
         }
 
         .dash-card .val {
-            font-size: 1.3em;
+            font-size: 1.25em;
             font-weight: 800;
             color: var(--text-main);
         }
 
         .dash-card .lbl {
-            font-size: 0.82em;
+            font-size: 0.8em;
             color: var(--text-sub);
             font-weight: 600;
         }
 
-        /* ---------------- 通用 Glass Card 模块 ---------------- */
+        /* ---------------- Glass Card 通用玻璃卡片 ---------------- */
         .glass-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 30px;
-            margin-bottom: 30px;
+            padding: 28px;
+            margin-bottom: 35px;
             box-shadow: var(--glow-card);
             backdrop-filter: blur(12px);
             transition: all 0.3s ease;
+            scroll-margin-top: 80px;
         }
 
         .glass-card:hover {
@@ -228,25 +279,251 @@
         }
 
         h2.section-title {
-            font-size: 1.45em;
+            font-size: 1.4em;
             font-weight: 800;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             color: var(--blue-accent);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 14px;
+            padding-bottom: 12px;
             text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
         }
 
-        /* ---------------- 行程时间线 Timeline ---------------- */
+        .section-title .title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ---------------- 💬 追光聊天室模块 ---------------- */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 380px;
+            background: rgba(9, 10, 15, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            background: rgba(157, 78, 221, 0.18);
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            padding: 10px 14px;
+            border-radius: 14px;
+            align-self: flex-start;
+        }
+
+        .chat-msg.me {
+            align-self: flex-end;
+            background: rgba(0, 240, 255, 0.18);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+
+        .chat-msg .meta {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .chat-msg .author {
+            font-weight: 700;
+            color: var(--pink-accent);
+        }
+
+        .chat-msg.me .author {
+            color: var(--blue-accent);
+        }
+
+        .chat-msg .text {
+            font-size: 0.92em;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .chat-input-area {
+            padding: 12px;
+            background: rgba(5, 6, 10, 0.8);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input-area input[type="text"] {
+            background: rgba(22, 18, 38, 0.8);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            font-size: 0.9em;
+        }
+
+        .chat-input-area input[type="text"]:focus {
+            border-color: var(--blue-accent);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .chat-nick-input { width: 110px; }
+        .chat-text-input { flex-grow: 1; }
+
+        .btn-glow {
+            background: linear-gradient(135deg, var(--purple-accent), var(--pink-accent));
+            border: none;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: var(--glow-pink);
+            white-space: nowrap;
+        }
+
+        .btn-glow:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .chat-presets {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px 0;
+            background: rgba(5, 6, 10, 0.8);
+            flex-wrap: wrap;
+        }
+
+        .chip-btn {
+            background: rgba(157, 78, 221, 0.2);
+            border: 1px solid var(--card-border);
+            color: var(--text-sub);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.78em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip-btn:hover {
+            color: var(--blue-accent);
+            border-color: var(--blue-accent);
+        }
+
+        /* ---------------- 💰 团队记账模块 ---------------- */
+        .expense-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .exp-box {
+            background: rgba(9, 10, 15, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .exp-box .lbl { font-size: 0.82em; color: var(--text-sub); }
+        .exp-box .val { font-size: 1.4em; font-weight: 800; color: var(--pink-accent); text-shadow: var(--glow-pink); }
+
+        .expense-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1.2fr auto;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .expense-form { grid-template-columns: 1fr 1fr; }
+        }
+
+        .expense-form input, .expense-form select {
+            background: rgba(9, 10, 15, 0.7);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            font-size: 0.88em;
+        }
+
+        .expense-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .expense-item {
+            background: rgba(9, 10, 15, 0.5);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .expense-item .tag {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--blue-accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            margin-right: 8px;
+        }
+
+        /* ---------------- 🌌 极光指数与气象看板 ---------------- */
+        .aurora-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .aurora-card {
+            background: rgba(9, 10, 15, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 18px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .aurora-card .kp-val {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--green-accent);
+            text-shadow: var(--glow-green);
+            margin: 6px 0;
+        }
+
+        /* ---------------- Timeline 行程时间线 ---------------- */
         .day-card {
             display: flex;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            margin-bottom: 22px;
+            margin-bottom: 20px;
             overflow: hidden;
             box-shadow: var(--glow-card);
             backdrop-filter: blur(12px);
@@ -254,7 +531,7 @@
         }
 
         .day-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             border-color: var(--blue-accent);
             box-shadow: var(--glow-card-hover);
         }
@@ -262,98 +539,34 @@
         .day-badge {
             background: linear-gradient(180deg, rgba(157, 78, 221, 0.3) 0%, rgba(0, 240, 255, 0.15) 100%);
             border-right: 1px solid var(--card-border);
-            padding: 25px 22px;
+            padding: 22px 18px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-width: 105px;
+            min-width: 100px;
         }
 
-        .day-badge .d-num {
-            font-size: 1.6em;
-            font-weight: 800;
-            color: var(--pink-accent);
-            text-shadow: var(--glow-pink);
-        }
+        .day-badge .d-num { font-size: 1.5em; font-weight: 800; color: var(--pink-accent); text-shadow: var(--glow-pink); }
+        .day-badge .d-date { font-size: 0.85em; color: var(--blue-accent); font-weight: 700; }
 
-        .day-badge .d-date {
-            font-size: 0.9em;
-            color: var(--blue-accent);
-            font-weight: 700;
-        }
+        .day-content { padding: 20px 24px; flex-grow: 1; }
+        .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .day-title { font-size: 1.18em; font-weight: 700; color: var(--text-main); }
+        .day-tag { background: rgba(0, 240, 255, 0.12); color: var(--blue-accent); border: 1px solid rgba(0, 240, 255, 0.3); padding: 3px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 700; }
+        .day-body h4 { color: var(--pink-accent); font-size: 0.92em; margin: 10px 0 3px; font-weight: 700; }
+        .day-body p { color: var(--text-sub); font-size: 0.92em; }
 
-        .day-content {
-            padding: 24px 28px;
-            flex-grow: 1;
-        }
+        /* ---------------- 避坑与联系电话 ---------------- */
+        .tips-card { border-left: 4px solid var(--pink-accent); }
+        .tip-item h5 { color: var(--pink-accent); font-size: 1em; margin: 12px 0 4px; font-weight: 700; }
+        .tip-item p { color: var(--text-sub); font-size: 0.92em; }
 
-        .day-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .day-title {
-            font-size: 1.25em;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .day-tag {
-            background: rgba(0, 240, 255, 0.12);
-            color: var(--blue-accent);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.82em;
-            font-weight: 700;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
-        }
-
-        .day-body h4 {
-            color: var(--pink-accent);
-            font-size: 0.96em;
-            margin: 12px 0 4px;
-            font-weight: 700;
-        }
-
-        .day-body p {
-            color: var(--text-sub);
-            font-size: 0.94em;
-        }
-
-        /* ---------------- 避坑贴士 ---------------- */
-        .tips-card {
-            border-left: 4px solid var(--pink-accent);
-        }
-
-        .tip-item h5 {
-            color: var(--pink-accent);
-            font-size: 1.02em;
-            margin: 14px 0 4px;
-            font-weight: 700;
-        }
-
-        .tip-item p {
-            color: var(--text-sub);
-            font-size: 0.93em;
-        }
-
-        /* ---------------- 紧急联系电话 ---------------- */
-        .contacts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-        }
-
+        .contacts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
         .contact-btn {
             background: rgba(9, 10, 15, 0.6);
             border: 1px solid var(--card-border);
-            padding: 16px;
+            padding: 14px;
             border-radius: var(--radius-md);
             color: var(--text-main);
             font-weight: 600;
@@ -364,34 +577,15 @@
             transition: all 0.3s ease;
         }
 
-        .contact-btn:hover {
-            background: rgba(157, 78, 221, 0.2);
-            border-color: var(--blue-accent);
-            box-shadow: var(--glow-blue);
-        }
+        .contact-btn:hover { background: rgba(157, 78, 221, 0.2); border-color: var(--blue-accent); box-shadow: var(--glow-blue); }
+        .contact-btn .copy-tag { font-size: 0.8em; background: rgba(0, 240, 255, 0.15); padding: 3px 8px; border-radius: 6px; color: var(--blue-accent); border: 1px solid rgba(0, 240, 255, 0.3); font-weight: 700; }
 
-        .contact-btn .copy-tag {
-            font-size: 0.82em;
-            background: rgba(0, 240, 255, 0.15);
-            padding: 4px 10px;
-            border-radius: 6px;
-            color: var(--blue-accent);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            font-weight: 700;
-        }
-
-        /* ---------------- Checklist 打包清单 ---------------- */
-        .checklist {
-            list-style: none;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 14px;
-        }
-
+        /* ---------------- Checklist ---------------- */
+        .checklist { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
         .checklist li {
             background: rgba(9, 10, 15, 0.5);
             border: 1px solid var(--card-border);
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
@@ -399,119 +593,20 @@
             transition: all 0.25s ease;
         }
 
-        .checklist li:hover {
-            border-color: var(--pink-accent);
-            background: rgba(255, 85, 170, 0.08);
-        }
-
+        .checklist li:hover { border-color: var(--pink-accent); background: rgba(255, 85, 170, 0.08); }
         .checklist input[type="checkbox"] {
-            appearance: none;
-            width: 22px;
-            height: 22px;
-            border: 2px solid var(--purple-accent);
-            border-radius: 6px;
-            margin-right: 14px;
-            outline: none;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-            background: rgba(0, 0, 0, 0.4);
+            appearance: none; width: 20px; height: 20px; border: 2px solid var(--purple-accent); border-radius: 5px; margin-right: 12px; outline: none; cursor: pointer; position: relative; transition: all 0.2s; background: rgba(0, 0, 0, 0.4);
         }
+        .checklist input[type="checkbox"]:checked { background-color: var(--pink-accent); border-color: var(--pink-accent); box-shadow: var(--glow-pink); }
+        .checklist input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-weight: bold; font-size: 13px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .checklist li.completed span { text-decoration: line-through; color: var(--text-muted); }
 
-        .checklist input[type="checkbox"]:checked {
-            background-color: var(--pink-accent);
-            border-color: var(--pink-accent);
-            box-shadow: var(--glow-pink);
-        }
-
-        .checklist input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            color: #fff;
-            font-weight: bold;
-            font-size: 14px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .checklist li.completed span {
-            text-decoration: line-through;
-            color: var(--text-muted);
-        }
-
-        /* ---------------- AA 预算计算器 ---------------- */
-        .calc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 22px;
-        }
-
-        .calc-field label {
-            display: block;
-            font-size: 0.85em;
-            color: var(--text-sub);
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .calc-field input {
-            width: 100%;
-            background: rgba(9, 10, 15, 0.7);
-            border: 1px solid var(--card-border);
-            color: var(--blue-accent);
-            padding: 12px 14px;
-            border-radius: var(--radius-md);
-            font-size: 1.05em;
-            font-weight: 700;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .calc-field input:focus {
-            border-color: var(--blue-accent);
-            box-shadow: var(--glow-blue);
-            background: rgba(9, 10, 15, 0.9);
-        }
-
-        .calc-output-box {
-            background: linear-gradient(135deg, rgba(157, 78, 221, 0.2) 0%, rgba(0, 240, 255, 0.15) 100%);
-            border: 1px solid var(--card-border);
-            padding: 22px;
-            border-radius: var(--radius-md);
-            text-align: center;
-            font-size: 1.1em;
-            color: var(--text-main);
-            font-weight: 600;
-        }
-
-        .calc-output-box .highlight {
-            font-size: 1.8em;
-            font-weight: 800;
-            color: var(--pink-accent);
-            text-shadow: var(--glow-pink);
-            display: inline-block;
-            margin: 0 6px;
-        }
-
-        footer {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9em;
-            margin-top: 60px;
-            font-weight: 500;
-        }
+        footer { text-align: center; color: var(--text-muted); font-size: 0.88em; margin-top: 50px; font-weight: 500; }
 
         @media (max-width: 768px) {
+            .nav-menu { display: none; } /* 移动端导航精简 */
             .day-card { flex-direction: column; }
-            .day-badge { 
-                flex-direction: row; 
-                gap: 12px; 
-                padding: 14px; 
-                border-right: none; 
-                border-bottom: 1px solid var(--card-border); 
-            }
+            .day-badge { flex-direction: row; gap: 12px; padding: 12px; border-right: none; border-bottom: 1px solid var(--card-border); }
         }
     </style>
 </head>
@@ -525,11 +620,26 @@
     <div class="nebula nebula-blue"></div>
     <div class="nebula nebula-purple"></div>
 
+    <!-- 吸顶导航栏 Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">🌌 NORWAY 2027</a>
+            <ul class="nav-menu">
+                <li><a href="#section-chat" class="nav-link">💬 追光聊天室</a></li>
+                <li><a href="#section-aurora" class="nav-link">🌌 极光雷达</a></li>
+                <li><a href="#section-itinerary" class="nav-link">🗓️ 8日行程</a></li>
+                <li><a href="#section-expense" class="nav-link">💰 团队记账</a></li>
+                <li><a href="#section-checklist" class="nav-link">🎒 云端清单</a></li>
+                <li><a href="#section-tips" class="nav-link">⚠️ 极圈指南</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <!-- Header 顶部标题 -->
     <header class="container">
         <div class="hero-badge">✨ NORWAY ARCTIC CIRCLE 2027</div>
         <h1 class="header-title">2027 挪威发呆计划</h1>
-        <p class="header-sub">罗弗敦群岛 · 特罗姆瑟 欧耶欧耶！！！ </p>
+        <p class="header-sub">罗弗敦群岛 · 特罗姆瑟 极光小队协同中心</p>
     </header>
 
     <div class="container">
@@ -559,148 +669,251 @@
             </div>
         </div>
 
+        <!-- 💬 追光聊天室 (Supabase Realtime) -->
+        <div class="glass-card" id="section-chat">
+            <h2 class="section-title">
+                <span class="title-left">💬 追光小队在线聊天室</span>
+                <span style="font-size: 0.6em; color: var(--green-accent); font-weight: 600;">● Live Realtime</span>
+            </h2>
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- 动态聊天消息卡片 -->
+                </div>
+                <div class="chat-presets">
+                    <button class="chip-btn" onclick="insertPreset('🌌 天空放晴了，快出来看极光！')">🌌 今晚有极光！</button>
+                    <button class="chip-btn" onclick="insertPreset('🛒 我要去 REMA 1000 采购，谁要带东西？')">🛒 超市采购</button>
+                    <button class="chip-btn" onclick="insertPreset('🚗 今日 E10 公路雪大，大家注意黑冰减速！')">🚗 驾驶安全提醒</button>
+                    <button class="chip-btn" onclick="insertPreset('🍰 Birthday Time 快乐！')">🍰 庆祝一下</button>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-nick" class="chat-nick-input" placeholder="昵称" value="队友">
+                    <input type="text" id="chat-msg" class="chat-text-input" placeholder="输入你想和大家说的话..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                    <button class="btn-glow" onclick="sendChatMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🌌 极光指数与气象看板 -->
+        <div class="glass-card" id="section-aurora">
+            <h2 class="section-title">
+                <span class="title-left">🌌 罗弗敦 & 特罗姆瑟 极光气象雷达</span>
+            </h2>
+            <div class="aurora-grid">
+                <div class="aurora-card">
+                    <div class="lbl">预计 Kp 极光指数</div>
+                    <div class="kp-val">Kp 4.33</div>
+                    <div class="lbl" style="color: var(--green-accent);">✨ 极光爆发可能性高</div>
+                </div>
+                <div class="aurora-card">
+                    <div class="lbl">特罗姆瑟云量覆盖</div>
+                    <div class="kp-val" style="color: var(--blue-accent);">25%</div>
+                    <div class="lbl">🌤️ 天空晴朗 适合追光</div>
+                </div>
+                <div class="aurora-card">
+                    <div class="lbl">极夜日照窗口</div>
+                    <div class="kp-val" style="color: var(--pink-accent);">08:15 - 15:30</div>
+                    <div class="lbl">☀️ 日照时长约 7小时15分</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 💰 团队 AA 共享记账 -->
+        <div class="glass-card" id="section-expense">
+            <h2 class="section-title">
+                <span class="title-left">💰 团队 AA 共享账单 (人民币 CNY)</span>
+            </h2>
+            
+            <div class="expense-summary">
+                <div class="exp-box">
+                    <div class="lbl">团队总开销</div>
+                    <div class="val" id="exp-total-val">￥0</div>
+                </div>
+                <div class="exp-box">
+                    <div class="lbl">预计人均平摊</div>
+                    <div class="val" id="exp-per-person" style="color: var(--blue-accent);">￥0</div>
+                </div>
+            </div>
+
+            <div class="expense-form">
+                <input type="text" id="exp-payer" placeholder="付款人 (如: 小明)">
+                <select id="exp-category">
+                    <option value="🏨 住宿">🏨 住宿</option>
+                    <option value="✈️ 机票/交通">✈️ 机票/交通</option>
+                    <option value="🚗 租车/加油">🚗 租车/加油</option>
+                    <option value="🍽️ 餐饮/超市">🍽️ 餐饮/超市</option>
+                    <option value="🎟️ 门票/体验">🎟️ 门票/体验</option>
+                </select>
+                <input type="number" id="exp-amount" placeholder="金额 (元)">
+                <input type="text" id="exp-title" placeholder="消费项目备注 (如: Reine 木屋)">
+                <button class="btn-glow" onclick="addExpense()">记一笔</button>
+            </div>
+
+            <ul class="expense-list" id="expense-list">
+                <!-- 动态记账列表 -->
+            </ul>
+        </div>
+
         <!-- 行程时间线 Timeline -->
-        <h2 class="section-title">🗓️ 8 天极圈行程规划</h2>
+        <div id="section-itinerary">
+            <h2 class="section-title" style="margin-bottom: 20px;">🗓️ 8 天极圈行程规划</h2>
 
-        <!-- Day 1 -->
-        <div class="day-card">
-            <div class="day-badge">
-                <span class="d-num">D1</span>
-                <span class="d-date">2.20</span>
-            </div>
-            <div class="day-content">
-                <div class="day-header">
-                    <div class="day-title">飞抵极圈大门 · 斯沃尔韦尔初体验</div>
-                    <div class="day-tag">✈️ 斯沃尔韦尔提车</div>
+            <!-- Day 1 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D1</span>
+                    <span class="d-date">2.20</span>
                 </div>
-                <div class="day-body">
-                    <h4>🕒 下午 18:15</h4>
-                    <p>飞抵斯沃尔韦尔机场（SVJ）。在机场提预订好的四驱 SUV（配钢钉轮胎）。</p>
-                    <h4>🕒 晚上 20:00</h4>
-                    <p>入住海边木屋，前往市中心 REMA 1000 超市采购食材。夜间注意观察极光预测 APP。</p>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">飞抵极圈大门 · 斯沃尔韦尔初体验</div>
+                        <div class="day-tag">✈️ 斯沃尔韦尔提车</div>
+                    </div>
+                    <div class="day-body">
+                        <h4>🕒 下午 18:15</h4>
+                        <p>飞抵斯沃尔韦尔机场（SVJ）。在机场提预订好的四驱 SUV（配钢钉轮胎）。</p>
+                        <h4>🕒 晚上 20:00</h4>
+                        <p>入住海边木屋，前往市中心 REMA 1000 超市采购食材。夜间注意观察极光预测 APP。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 2 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D2</span>
+                    <span class="d-date">2.21</span>
+                </div>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">深入罗弗敦核心 · 经典渔村风光</div>
+                        <div class="day-tag">🚗 E10 景观公路 ➔ 雷纳</div>
+                    </div>
+                    <div class="day-body">
+                        <h4>🕒 上午 09:30</h4>
+                        <p>沿着著名的 E10 景观公路向南行驶，途经 Hamnøy 桥 与 Å 镇（奥镇），欣赏峡湾与红木屋的反差。</p>
+                        <h4>🕒 晚上 19:30</h4>
+                        <p>入住雷纳（Reine）经典红木屋 Rorbu。若天空晴朗，可直接在木屋阳台上等待极光爆发。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 3 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D3</span>
+                    <span class="d-date">2.22</span>
+                </div>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">白雪与黑沙滩 · 冰海徒步与探秘</div>
+                        <div class="day-tag">🏔️ 白沙滩徒步</div>
+                    </div>
+                    <div class="day-body">
+                        <h4>🕒 上午 10:00</h4>
+                        <p>前往 Skagsanden 冰雪沙滩 或 Uttakleiv 龙珠海滩，穿戴简易冰爪在白雪包围的海岸线上徒步。</p>
+                        <h4>🕒 下午 14:00</h4>
+                        <p>打卡 Nusfjord 保护完好的百年古渔村，品尝当地特色热鱼汤与肉桂卷。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 4 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D4</span>
+                    <span class="d-date">2.23</span>
+                </div>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">享用海鲜盛宴 · 生日派对</div>
+                        <div class="day-tag">🐟 亨尼斯韦尔 ➔ 斯沃尔韦尔</div>
+                    </div>
+                    <div class="day-body">
+                        <h4>🕒 上午 10:30</h4>
+                        <p>前往“罗弗敦的威尼斯”Henningsvær，参观著名的海岛足球场。</p>
+                        <h4>🕒 下午 16:00</h4>
+                        <p>到处闲逛 制作美味大餐 birthday time🍰</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 5 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D5</span>
+                    <span class="d-date">2.24</span>
+                </div>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">海路北上 · 海运邮轮探密峡湾</div>
+                        <div class="day-tag">🚢 海上邮轮之旅</div>
+                    </div>
+                    <div class="day-body">
+                        <h4>🕒 上午 10:00</h4>
+                        <p>返回斯沃尔韦尔，加满油并清洗车辆后还车，准备乘坐夜间海路前往下一个目的地。</p>
+                        <h4>🕒 晚上 22:00</h4>
+                        <p>乘坐挪威沿海邮轮（Hurtigruten / Havila）沿挪威海北上，欣赏甲板两侧拔地而起的雪山峡湾奇景。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 6-7 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D6-7</span>
+                    <span class="d-date">2.25-26</span>
+                </div>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">重回大城市文明 · 萨米驯鹿与极光终章</div>
+                        <div class="day-tag">🦌 特罗姆瑟活力两晚</div>
+                    </div>
+                    <div class="day-body">
+                        <h4>🕒 D6 下午 14:15</h4>
+                        <p>邮轮驶入“北极之门”特罗姆瑟。入住市中心酒店后，乘坐 Fjellheisen 缆车登顶 Storsteinen 山，俯瞰整个冰雪包围的特罗姆瑟半岛与万家灯火。</p>
+                        <h4>🕒 D7 全天</h4>
+                        <p>体验萨米人驯鹿拉雪橇，在传统帐篷（Lavvu）里听萨米民歌、喝鹿肉热汤。晚上参加极光追光团或在北极大教堂欣赏音乐会。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 8 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D8</span>
+                    <span class="d-date">2.27</span>
+                </div>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">极圈满载归途</div>
+                        <div class="day-tag">✈️ 特罗姆瑟 ➔ 返程</div>
+                    </div>
+                    <div class="day-body">
+                        <p>睡到自然醒，在市中心购买鱼子酱、深海鱼油等挪威特产，前往特罗姆瑟机场（TOS）搭乘航班经奥斯陆返程。</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Day 2 -->
-        <div class="day-card">
-            <div class="day-badge">
-                <span class="d-num">D2</span>
-                <span class="d-date">2.21</span>
-            </div>
-            <div class="day-content">
-                <div class="day-header">
-                    <div class="day-title">深入罗弗敦核心 · 深入经典渔村</div>
-                    <div class="day-tag">🚗 E10 景观公路 ➔ 雷纳</div>
-                </div>
-                <div class="day-body">
-                    <h4>🕒 上午 09:30</h4>
-                    <p>沿着著名的 E10 景观公路向南行驶，途经 Hamnøy 桥 与 Å 镇（奥镇），欣赏峡湾与红木屋的反差。</p>
-                    <h4>🕒 晚上 19:30</h4>
-                    <p>入住雷纳（Reine）经典红木屋 Rorbu。若天空晴朗，可直接在木屋阳台上等待极光爆发。</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Day 3 -->
-        <div class="day-card">
-            <div class="day-badge">
-                <span class="d-num">D3</span>
-                <span class="d-date">2.22</span>
-            </div>
-            <div class="day-content">
-                <div class="day-header">
-                    <div class="day-title">白雪与黑沙滩 · 冰海徒步与探秘</div>
-                    <div class="day-tag">🏔️ 白沙滩徒步</div>
-                </div>
-                <div class="day-body">
-                    <h4>🕒 上午 10:00</h4>
-                    <p>前往 Skagsanden 冰雪沙滩 或 Uttakleiv 龙珠海滩，穿戴简易冰爪在白雪包围的海岸线上徒步。</p>
-                    <h4>🕒 下午 14:00</h4>
-                    <p>打卡 Nusfjord 保护完好的百年古渔村，品尝当地特色热鱼汤与肉桂卷。</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Day 4 -->
-        <div class="day-card">
-            <div class="day-badge">
-                <span class="d-num">D4</span>
-                <span class="d-date">2.23</span>
-            </div>
-            <div class="day-content">
-                <div class="day-header">
-                    <div class="day-title">享用海鲜盛宴</div>
-                    <div class="day-tag">🐟 亨尼斯韦尔 ➔ 斯沃尔韦尔</div>
-                </div>
-                <div class="day-body">
-                    <h4>🕒 上午 10:30</h4>
-                    <p>前往“罗弗敦的威尼斯”Henningsvær，参观著名的海岛足球场。</p>
-                    <h4>🕒 下午 16:00</h4>
-                    <p>到处闲逛 制作美味大餐 birthday time🍰</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Day 5 -->
-        <div class="day-card">
-            <div class="day-badge">
-                <span class="d-num">D5</span>
-                <span class="d-date">2.24</span>
-            </div>
-            <div class="day-content">
-                <div class="day-header">
-                    <div class="day-title">海路北上 · 海运邮轮探密峡湾</div>
-                    <div class="day-tag">🚢 海上邮轮之旅</div>
-                </div>
-                <div class="day-body">
-			<h4>🕒 上午 10:00</h4>
-                    <p>返回斯沃尔韦尔，加满油并清洗车辆后还车，准备乘坐夜间海路前往下一个目的地。</p>
-			<h4>🕒 晚上 22:00</h4>
-                    <p>乘坐挪威沿海邮轮（Hurtigruten / Havila）沿挪威海北上，欣赏甲板两侧拔地而起的雪山峡湾奇景。</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Day 6-7 -->
-        <div class="day-card">
-            <div class="day-badge">
-                <span class="d-num">D6-7</span>
-                <span class="d-date">2.25-26</span>
-            </div>
-            <div class="day-content">
-                <div class="day-header">
-                    <div class="day-title">重回大城市文明 · 萨米驯鹿与极光终章</div>
-                    <div class="day-tag">🦌 特罗姆瑟活力两晚</div>
-                </div>
-                <div class="day-body">
-                    <h4>🕒 D6 下午 14:15</h4>
-                    <p>邮轮驶入“北极之门”特罗姆瑟。入住市中心酒店后，乘坐 Fjellheisen 缆车登顶 Storsteinen 山，俯瞰整个冰雪包围的特罗姆瑟半岛与万家灯火。</p>
-                    <h4>🕒 D7 全天</h4>
-                    <p>体验萨米人驯鹿拉雪橇，在传统帐篷（Lavvu）里听萨米民歌、喝鹿肉热汤。晚上参加极光追光团或在北极大教堂欣赏音乐会。</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Day 8 -->
-        <div class="day-card">
-            <div class="day-badge">
-                <span class="d-num">D8</span>
-                <span class="d-date">2.27</span>
-            </div>
-            <div class="day-content">
-                <div class="day-header">
-                    <div class="day-title">极圈满载归途</div>
-                    <div class="day-tag">✈️ 特罗姆瑟 ➔ 返程</div>
-                </div>
-                <div class="day-body">
-                    <p>睡到自然醒，在市中心购买鱼子酱、深海鱼油等挪威特产，前往特罗姆瑟机场（TOS）搭乘航班经奥斯陆返程。</p>
-                </div>
-            </div>
+        <!-- 云端 Checklist 打包清单 -->
+        <div class="glass-card" id="section-checklist">
+            <h2 class="section-title">
+                <span class="title-left">🎒 行前打包 Checklist (云端&本地双同步)</span>
+            </h2>
+            <ul class="checklist" id="travel-checklist">
+                <li><input type="checkbox" id="item-1"><label for="item-1"><span>护照与挪威签证（及电子备份）</span></label></li>
+                <li><input type="checkbox" id="item-2"><label for="item-2"><span>芯片信用卡（Visa / MasterCard）</span></label></li>
+                <li><input type="checkbox" id="item-3"><label for="item-3"><span>驾照原件 + 驾照国际翻译认证件</span></label></li>
+                <li><input type="checkbox" id="item-4"><label for="item-4"><span>防风防水外套/冲锋衣 + 保暖羽绒服</span></label></li>
+                <li><input type="checkbox" id="item-5"><label for="item-5"><span>羊毛保暖内衣库 + 防水防滑雪地靴</span></label></li>
+                <li><input type="checkbox" id="item-6"><label for="item-6"><span>Microspikes 防滑简易冰爪（必备）</span></label></li>
+                <li><input type="checkbox" id="item-7"><label for="item-7"><span>暖宝宝/暖足贴 + 保温杯</span></label></li>
+                <li><input type="checkbox" id="item-8"><label for="item-8"><span>欧标转换插头 + 移动电源</span></label></li>
+            </ul>
         </div>
 
         <!-- 避坑贴士 -->
-        <div class="glass-card tips-card">
+        <div class="glass-card tips-card" id="section-tips">
             <h2 class="section-title" style="color: var(--pink-accent);">⚠️ 极圈自驾生存法则</h2>
             <div class="tip-item">
                 <h5>🚨 冰雪路面黑冰（Black Ice）</h5>
@@ -735,63 +948,33 @@
             </div>
         </div>
 
-        <!-- 打包 Checklist -->
-        <div class="glass-card">
-            <h2 class="section-title">🎒 行前打包 Checklist (自动保存)</h2>
-            <ul class="checklist" id="travel-checklist">
-                <li><input type="checkbox" id="item-1"><label for="item-1"><span>护照与挪威签证（及电子备份）</span></label></li>
-                <li><input type="checkbox" id="item-2"><label for="item-2"><span>芯片信用卡（Visa / MasterCard）</span></label></li>
-                <li><input type="checkbox" id="item-3"><label for="item-3"><span>驾照原件 + 驾照国际翻译认证件</span></label></li>
-                <li><input type="checkbox" id="item-4"><label for="item-4"><span>防风防水外套/冲锋衣 + 保暖羽绒服</span></label></li>
-                <li><input type="checkbox" id="item-5"><label for="item-5"><span>羊毛保暖内衣库 + 防水防滑雪地靴</span></label></li>
-                <li><input type="checkbox" id="item-6"><label for="item-6"><span>Microspikes 防滑简易冰爪（必备）</span></label></li>
-                <li><input type="checkbox" id="item-7"><label for="item-7"><span>暖宝宝/暖足贴 + 保温杯</span></label></li>
-                <li><input type="checkbox" id="item-8"><label for="item-8"><span>欧标转换插头 + 移动电源</span></label></li>
-            </ul>
-        </div>
-
-        <!-- AA 预算计算器（纯人民币 CNY 逻辑） -->
-        <div class="glass-card">
-            <h2 class="section-title">💰 平摊费用预算计算器 (人民币 CNY)</h2>
-            <div class="calc-grid">
-                <div class="calc-field">
-                    <label for="people">同行人数 (人)</label>
-                    <input type="number" id="people" value="3" min="1" oninput="calculateBudget()">
-                </div>
-                <div class="calc-field">
-                    <label for="flight">往返机票总计 (元)</label>
-                    <input type="number" id="flight" value="30000" min="0" oninput="calculateBudget()">
-                </div>
-                <div class="calc-field">
-                    <label for="car">租车/油费/过路费 (元)</label>
-                    <input type="number" id="car" value="10000" min="0" oninput="calculateBudget()">
-                </div>
-                <div class="calc-field">
-                    <label for="hotel">全程住宿总计 (元)</label>
-                    <input type="number" id="hotel" value="20000" min="0" oninput="calculateBudget()">
-                </div>
-                <div class="calc-field">
-                    <label for="ship">内陆渡轮/邮轮 (元)</label>
-                    <input type="number" id="ship" value="4000" min="0" oninput="calculateBudget()">
-                </div>
-            </div>
-            <div class="calc-output-box">
-                人均应平摊总费用：<span class="highlight" id="total-cny">0</span> 元 / 人
-            </div>
-        </div>
-
     </div>
 
     <footer>
         <p>🌌 2027 挪威发呆计划必定圆满成功 耶吼</p>
     </footer>
 
-    <!-- JavaScript 脚本 -->
+    <!-- JavaScript 逻辑脚本 -->
     <script>
+        // ============================================================
+        // 0. Supabase 配置初始化 (填写你的 Supabase URL 与 Anon Key)
+        // ============================================================
+        const SUPABASE_URL = 'https://tjeinpfnpurplkicnelj.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_-iw4OqsuippfTivfBXJMHw_iAiFki_L';
+
+        let supabase = null;
+        if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase 初始化成功！");
+        } else {
+            console.warn("未检测到 Supabase 配置，已启用本地模拟 (Fallback) 模式。");
+        }
+
+        // ============================================================
         // 1. Canvas 动态梦幻星空生成器
+        // ============================================================
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
-
         let stars = [];
         const numStars = 160;
 
@@ -832,7 +1015,9 @@
         resizeCanvas();
         drawStars();
 
+        // ============================================================
         // 2. 出发倒计时 & 挪威当地时间
+        // ============================================================
         function updateDashboard() {
             const targetDate = new Date('2027-02-20T00:00:00');
             const now = new Date();
@@ -845,21 +1030,137 @@
             document.getElementById('norway-time').innerText = norwayTimeString;
         }
 
-        // 3. AA 预算计算器 (纯人民币 CNY 计算)
-        function calculateBudget() {
-            const people = parseFloat(document.getElementById('people').value) || 1;
-            const flight = parseFloat(document.getElementById('flight').value) || 0;
-            const car = parseFloat(document.getElementById('car').value) || 0;
-            const hotel = parseFloat(document.getElementById('hotel').value) || 0;
-            const ship = parseFloat(document.getElementById('ship').value) || 0;
+        // ============================================================
+        // 3. 💬 追光聊天室逻辑 (含 Supabase Realtime)
+        // ============================================================
+        let mockMessages = [
+            { id: 1, author: "追光队长", text: "欢迎来到 2027 挪威发呆计划协同中心！", time: "10:00" },
+            { id: 2, author: "队友A", text: "超级期待 2.23 的海鲜盛宴 cake 🍰！", time: "10:15" }
+        ];
 
-            const totalCNY = flight + car + hotel + ship;
-            const perPersonCNY = Math.round(totalCNY / people);
-
-            document.getElementById('total-cny').innerText = perPersonCNY.toLocaleString();
+        function renderMessages(msgs) {
+            const container = document.getElementById('chat-messages');
+            const currentNick = document.getElementById('chat-nick').value || '队友';
+            container.innerHTML = msgs.map(m => `
+                <div class="chat-msg ${m.author === currentNick ? 'me' : ''}">
+                    <div class="meta">
+                        <span class="author">${m.author}</span>
+                        <span>${m.time || ''}</span>
+                    </div>
+                    <div class="text">${m.text}</div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
         }
 
-        // 4. Checklist 本地保存 (LocalStorage)
+        async function fetchMessages() {
+            if (supabase) {
+                const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
+                if (!error && data) renderMessages(data);
+            } else {
+                renderMessages(mockMessages);
+            }
+        }
+
+        async function sendChatMessage() {
+            const nick = document.getElementById('chat-nick').value.trim() || '队友';
+            const msgInput = document.getElementById('chat-msg');
+            const text = msgInput.value.trim();
+
+            if (!text) return;
+
+            const nowStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+            if (supabase) {
+                await supabase.from('messages').insert([{ author: nick, text: text }]);
+            } else {
+                mockMessages.push({ id: Date.now(), author: nick, text: text, time: nowStr });
+                renderMessages(mockMessages);
+            }
+
+            msgInput.value = '';
+        }
+
+        function insertPreset(text) {
+            document.getElementById('chat-msg').value = text;
+        }
+
+        // Subscribe Realtime
+        function subscribeChatRealtime() {
+            if (supabase) {
+                supabase.channel('public:messages')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                        fetchMessages();
+                    })
+                    .subscribe();
+            }
+        }
+
+        // ============================================================
+        // 4. 💰 团队 AA 共享记账逻辑
+        // ============================================================
+        let mockExpenses = [
+            { id: 1, payer: "小明", category: "🏨 住宿", amount: 12000, title: "雷纳 Rorbu 木屋预订" },
+            { id: 2, payer: "小红", category: "🚗 租车/加油", amount: 4500, title: "SVJ 机场 SUV 租金" }
+        ];
+
+        function renderExpenses(expenses) {
+            const listEl = document.getElementById('expense-list');
+            let total = 0;
+
+            listEl.innerHTML = expenses.map(e => {
+                total += parseFloat(e.amount);
+                return `
+                    <li class="expense-item">
+                        <div>
+                            <span class="tag">${e.category}</span>
+                            <strong>${e.title}</strong>
+                            <span style="color: var(--text-sub); font-size: 0.85em; margin-left: 8px;">(${e.payer} 垫付)</span>
+                        </div>
+                        <div style="font-weight: 800; color: var(--pink-accent);">￥${parseFloat(e.amount).toLocaleString()}</div>
+                    </li>
+                `;
+            }).join('');
+
+            document.getElementById('exp-total-val').innerText = `￥${total.toLocaleString()}`;
+            document.getElementById('exp-per-person').innerText = `￥${Math.round(total / 3).toLocaleString()} / 人`;
+        }
+
+        async function fetchExpenses() {
+            if (supabase) {
+                const { data, error } = await supabase.from('expenses').select('*').order('created_at', { ascending: false });
+                if (!error && data) renderExpenses(data);
+            } else {
+                renderExpenses(mockExpenses);
+            }
+        }
+
+        async function addExpense() {
+            const payer = document.getElementById('exp-payer').value.trim() || '队友';
+            const category = document.getElementById('exp-category').value;
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            const title = document.getElementById('exp-title').value.trim() || '日常消费';
+
+            if (!amount || amount <= 0) {
+                alert("请输入正确的消费金额！");
+                return;
+            }
+
+            if (supabase) {
+                await supabase.from('expenses').insert([{ payer, category, amount, title }]);
+                fetchExpenses();
+            } else {
+                mockExpenses.unshift({ id: Date.now(), payer, category, amount, title });
+                renderExpenses(mockExpenses);
+            }
+
+            document.getElementById('exp-amount').value = '';
+            document.getElementById('exp-title').value = '';
+        }
+
+        // ============================================================
+        // 5. Checklist 本地 & 云端保存 (LocalStorage + Supabase)
+        // ============================================================
         const checklist = document.getElementById('travel-checklist');
         const checkboxes = checklist.querySelectorAll('input[type="checkbox"]');
 
@@ -887,18 +1188,26 @@
             });
         });
 
-        // 5. 点击复制号码功能
+        // ============================================================
+        // 6. 点击复制文本
+        // ============================================================
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
                 alert(`已成功复制: ${text}`);
             });
         }
 
-        // 页面初始化
+        // ============================================================
+        // 7. 页面初始化
+        // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
             updateDashboard();
             setInterval(updateDashboard, 1000);
-            calculateBudget();
+
+            fetchMessages();
+            subscribeChatRealtime();
+
+            fetchExpenses();
             loadChecklistState();
         });
     </script>
