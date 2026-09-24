@@ -150,6 +150,25 @@
             box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
         }
 
+        /* 手机端汉堡按钮（桌面端不显示） */
+        .nav-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--blue-accent);
+            font-size: 1.15em;
+            line-height: 1;
+            padding: 9px 13px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s ease;
+        }
+
+        .nav-toggle:hover { background: rgba(0, 240, 255, 0.22); box-shadow: 0 0 12px rgba(0, 240, 255, 0.25); }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -279,6 +298,81 @@
             gap: 10px;
         }
 
+        .section-title .title-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .live-badge {
+            font-size: 0.6em;
+            color: var(--green-accent);
+            font-weight: 600;
+        }
+
+        /* 🧹 清空聊天室：跟标题同排的小按钮，做成"危险但克制"的红色描边 */
+        .btn-clear-chat {
+            background: rgba(255, 92, 122, 0.12);
+            border: 1px solid rgba(255, 92, 122, 0.45);
+            color: #ff8fa3;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.78em;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-clear-chat:hover {
+            background: rgba(255, 92, 122, 0.26);
+            border-color: #ff5c7a;
+            color: #ffe3e9;
+        }
+
+        .btn-clear-chat:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* 清空后聊天区里的空状态 + 撤销条 */
+        .chat-empty {
+            margin: auto;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9em;
+            line-height: 1.9;
+        }
+
+        .chat-undo {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 14px;
+            background: rgba(255, 92, 122, 0.14);
+            border-top: 1px solid rgba(255, 92, 122, 0.35);
+            color: var(--text-sub);
+            font-size: 0.82em;
+        }
+
+        .chat-undo.show { display: flex; }
+
+        .chat-undo button {
+            background: none;
+            border: 1px solid rgba(255, 92, 122, 0.55);
+            color: #ff8fa3;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .chat-undo button:hover { background: rgba(255, 92, 122, 0.22); color: #ffe3e9; }
+        .chat-undo button:disabled { opacity: 0.5; cursor: not-allowed; }
+
         /* 💬 追光聊天室模块 */
         .chat-container {
             display: flex;
@@ -351,7 +445,59 @@
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
         }
 
-        .chat-text-input { flex-grow: 1; }
+        .chat-text-input { flex-grow: 1; min-width: 0; }
+
+        /* 😊 表情选择器 */
+        .emoji-wrap { position: relative; flex-shrink: 0; display: inline-flex; }
+
+        .emoji-btn {
+            background: rgba(22, 18, 38, 0.8);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1.05em;
+            line-height: 1;
+            font-family: inherit;
+            transition: all 0.25s ease;
+        }
+
+        .emoji-btn:hover { border-color: var(--blue-accent); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
+
+        .emoji-panel {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            width: 272px;
+            max-width: 80vw;
+            max-height: 220px;
+            overflow-y: auto;
+            background: rgba(12, 10, 20, 0.98);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--glow-card-hover);
+            padding: 8px;
+            z-index: 60;
+            display: none;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+        }
+
+        .emoji-panel.open { display: grid; }
+
+        .emoji-panel button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.12em;
+            line-height: 1.85;
+            border-radius: 6px;
+            padding: 1px 0;
+            font-family: inherit;
+        }
+
+        .emoji-panel button:hover { background: rgba(0, 240, 255, 0.16); }
 
         .btn-glow {
             background: linear-gradient(135deg, var(--purple-accent), var(--pink-accent));
@@ -674,12 +820,151 @@
 
         .exp-payer-fixed strong { color: var(--blue-accent); }
 
+        /* =========================================
+           🔒 进门口令（第一道门：没解锁看不到页面内容）
+           ========================================= */
+        body.gate-locked .navbar,
+        body.gate-locked header,
+        body.gate-locked .container,
+        body.gate-locked footer { display: none !important; }
+
+        /* 口令门必须压在身份门之上（两个都是 position:fixed） */
+        .identity-gate.gate-top { z-index: 1001; }
+
+        .gate-input-row { display: flex; gap: 10px; margin: 20px 0 4px; }
+
+        .gate-input-row input {
+            flex: 1 1 auto; min-width: 0;
+            background: rgba(9, 10, 15, 0.7);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .gate-input-row input:focus { border-color: var(--blue-accent); box-shadow: 0 0 12px rgba(0, 240, 255, 0.25); }
+
+        .gate-error { color: var(--pink-accent); font-size: 0.84em; font-weight: 700; min-height: 1.3em; margin-top: 10px; }
+
+        .gate-remember {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 6px; color: var(--text-sub); font-size: 0.84em; cursor: pointer;
+        }
+
+        .gate-remember input { width: 16px; height: 16px; accent-color: var(--pink-accent); cursor: pointer; }
+
+        @keyframes gateShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-7px); }
+            75% { transform: translateX(7px); }
+        }
+
+        .shake { animation: gateShake 0.32s ease; }
+
+        /* =========================================
+           ✏️ 改名 / 换人弹层
+           ========================================= */
+        .opt-block { display: flex; flex-direction: column; gap: 10px; margin: 18px 0 4px; }
+        .opt-block .identity-opt { width: 100%; padding: 13px 18px; }
+        .opt-block .identity-opt.danger { border-color: rgba(255, 85, 170, 0.35); }
+
+        .modal-note {
+            text-align: left;
+            background: rgba(255, 85, 170, 0.08);
+            border: 1px solid rgba(255, 85, 170, 0.28);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            margin-top: 16px;
+            font-size: 0.79em;
+            line-height: 1.65;
+            color: var(--text-sub);
+        }
+
+        .modal-note strong { color: var(--pink-accent); }
+
+        .modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+
+        .btn-ghost {
+            background: rgba(9, 10, 15, 0.6);
+            border: 1px solid var(--card-border);
+            color: var(--text-sub);
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.9em;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s ease;
+        }
+
+        .btn-ghost:hover { border-color: var(--pink-accent); color: var(--pink-accent); }
+
         footer { text-align: center; color: var(--text-muted); font-size: 0.88em; margin-top: 50px; font-weight: 500; }
 
         @media (max-width: 768px) {
+            /* ---- 导航栏：手机端改成汉堡菜单（原来直接 display:none，手机上就没有导航了）---- */
             .nav-menu { display: none; }
+            .nav-toggle { display: inline-flex; }
+            .nav-container { position: relative; padding: 12px 14px; }
+            .nav-menu.open {
+                display: flex;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                gap: 2px;
+                max-height: 68vh;
+                overflow-y: auto;
+                padding: 8px 10px 12px;
+                background: rgba(5, 6, 10, 0.98);
+                border-bottom: 1px solid var(--card-border);
+                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+            }
+            .nav-menu.open li { width: 100%; }
+            .nav-menu.open .nav-link { display: block; padding: 12px 14px; font-size: 0.95em; }
+
+            /* ---- 版式整体收紧 ---- */
+            .container { padding: 0 14px; }
+            header { padding: 26px 14px 20px; }
+            .section-title { font-size: 1.05em; flex-wrap: wrap; gap: 8px; }
+            /* 窄屏把标题右边的 "● Live Realtime" 让给「清空聊天」按钮，它只是装饰 */
+            .live-badge { display: none; }
+            .btn-clear-chat { padding: 5px 10px; }
+            .glass-card { padding: 16px; }
             .day-card { flex-direction: column; }
             .day-badge { flex-direction: row; gap: 12px; padding: 12px; border-right: none; border-bottom: 1px solid var(--card-border); }
+
+            /* ---- 聊天输入区：手机上分两行，别挤成一团 ---- */
+            .chat-input-area { flex-wrap: wrap; gap: 8px; padding: 10px; }
+            .chat-text-input { order: 1; flex: 1 1 100%; min-width: 0; }
+            .identity-chip { order: 2; }
+            .emoji-wrap { order: 3; margin-left: auto; }
+            .chat-input-area .btn-glow { order: 4; }
+
+            /* ---- 记账条目：允许换行，别撑破卡片 ---- */
+            .expense-item { flex-wrap: wrap; gap: 6px; }
+
+            /* ---- 手机上输入框统一 16px：低于 16px 时 iOS 会自动放大页面 ---- */
+            .chat-input-area input[type="text"],
+            .expense-form input,
+            .expense-form select,
+            .gate-input-row input { font-size: 16px; }
+        }
+
+        @media (max-width: 560px) {
+            .expense-form { grid-template-columns: 1fr; }
+            .identity-card { padding: 22px 16px; }
+            .identity-opt { padding: 12px 18px; }
+            .identity-chip { padding: 9px 8px; }
+        }
+
+        @media (max-width: 380px) {
+            .nav-logo { font-size: 1em; }
+            .emoji-panel { width: 240px; }
         }
     </style>
 </head>
@@ -697,16 +982,36 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="#" class="nav-logo">🌌 NORWAY 2027</a>
-            <ul class="nav-menu">
+            <button class="nav-toggle" id="nav-toggle" type="button" aria-label="打开导航菜单" aria-expanded="false" onclick="toggleNavMenu()">☰</button>
+            <ul class="nav-menu" id="nav-menu">
                 <li><a href="#section-chat" class="nav-link">💬 追光聊天室</a></li>
                 <li><a href="#section-aurora" class="nav-link">🌌 极光雷达</a></li>
                 <li><a href="#section-itinerary" class="nav-link">🗓️ 8日行程</a></li>
                 <li><a href="#section-expense" class="nav-link">💰 团队记账</a></li>
-                <li><a href="#section-checklist" class="nav-link">🎒 云端清单</a></li>
+                <li><a href="#section-checklist" class="nav-link">🎒 行前打包</a></li>
                 <li><a href="#section-tips" class="nav-link">⚠️ 极圈指南</a></li>
             </ul>
         </div>
     </nav>
+
+    <!-- 🔒 进门口令（第一道门：输入正确口令前，页面内容一律不显示） -->
+    <div class="identity-gate gate-top" id="site-gate" style="display: none;">
+        <div class="identity-card" id="site-gate-card">
+            <div class="identity-badge">🔒 PRIVATE</div>
+            <h3>2027 挪威发呆计划</h3>
+            <p class="identity-hint">这是小队的私人页面，输入进门口令才能进入。</p>
+            <div class="gate-input-row">
+                <input type="password" id="site-password" placeholder="请输入进门口令" autocomplete="off"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();tryUnlockSite();}">
+                <button class="btn-glow" type="button" onclick="tryUnlockSite()">进入</button>
+            </div>
+            <div class="gate-error" id="site-gate-error"></div>
+            <label class="gate-remember">
+                <input type="checkbox" id="site-remember">
+                <span>记住这台设备，下次不用再输</span>
+            </label>
+        </div>
+    </div>
 
     <!-- 🔐 身份认领（首次进入时出现，认领后记在本机） -->
     <div class="identity-gate" id="identity-gate" style="display: none;">
@@ -715,7 +1020,44 @@
             <h3>你是队伍里的谁？</h3>
             <p class="identity-hint">选好后会记住在这台设备上，之后发消息、记账都自动署你的名字，不用再手填。</p>
             <div class="identity-options" id="identity-options"></div>
-            <p class="identity-hint identity-warn" id="identity-footnote">认领后身份即锁定，改名需要队长口令。</p>
+            <p class="identity-hint identity-warn" id="identity-footnote">想改名字：点聊天框上的 ✏️，历史记录会一起改名同步给全队。换成别人则需要队长口令。</p>
+        </div>
+    </div>
+
+    <!-- 👤 身份操作菜单（改名 → 同步历史记录 / 换人 → 需队长口令） -->
+    <div class="identity-gate" id="identity-menu" style="display: none;">
+        <div class="identity-card">
+            <div class="identity-badge">👤 我的身份</div>
+            <h3 id="identity-menu-title">当前身份：未认领</h3>
+            <p class="identity-hint">改名之后，聊天记录、账单、打包清单里所有署你旧名字的记录都会一起换成新名字。</p>
+            <div class="opt-block">
+                <button class="identity-opt" type="button" onclick="openRenameGate()">✏️ 更改我的名字</button>
+                <button class="identity-opt danger" type="button" onclick="requestIdentityChange()">🔄 换成队伍里的其他人</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-ghost" type="button" onclick="closeIdentityMenu()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✏️ 改名弹层（新名字会替换掉云端所有旧名字的记录） -->
+    <div class="identity-gate" id="rename-gate" style="display: none;">
+        <div class="identity-card">
+            <div class="identity-badge">✏️ 更改名字</div>
+            <h3>当前：<span id="rename-old" style="color: var(--blue-accent);">-</span></h3>
+            <div class="gate-input-row">
+                <input type="text" id="rename-input" maxlength="12" placeholder="输入新名字（最多 12 字）" autocomplete="off"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();submitRename();}">
+                <button class="btn-glow" type="button" id="rename-submit" onclick="submitRename()">确认改名</button>
+            </div>
+            <div class="gate-error" id="rename-error"></div>
+            <div class="modal-note">
+                ⚠️ 确认后，<strong>聊天记录、账单、打包清单</strong>里所有以「<strong id="rename-old-2">-</strong>」署名的记录都会一起改成新名字，全队立刻同步看到。<br>
+                改名不会动别人的记录；改错了再改回来就行。
+            </div>
+            <div class="modal-actions">
+                <button class="btn-ghost" type="button" onclick="closeRenameGate()">取消</button>
+            </div>
         </div>
     </div>
 
@@ -757,10 +1099,18 @@
         <div class="glass-card" id="section-chat">
             <h2 class="section-title">
                 <span class="title-left">💬 追光小队在线聊天室</span>
-                <span style="font-size: 0.6em; color: var(--green-accent); font-weight: 600;">● Live Realtime</span>
+                <span class="title-right">
+                    <span class="live-badge">● Live Realtime</span>
+                    <button type="button" class="btn-clear-chat" id="btn-clear-chat"
+                            onclick="clearChatMessages()" title="一键删掉聊天室里的全部消息">🧹 清空聊天</button>
+                </span>
             </h2>
             <div class="chat-container">
                 <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-undo" id="chat-undo">
+                    <span id="chat-undo-text">已清空。</span>
+                    <button type="button" id="chat-undo-btn" onclick="undoClearChatMessages()">撤销</button>
+                </div>
                 <div class="chat-presets">
                     <button class="chip-btn" onclick="insertPreset('🌌 天空放晴了，快出来看极光！')">🌌 今晚有极光！</button>
                     <button class="chip-btn" onclick="insertPreset('🛒 我要去 REMA 1000 采购，谁要带东西？')">🛒 超市采购</button>
@@ -770,9 +1120,13 @@
                 <div class="chat-input-area">
                     <span class="identity-chip" title="身份已锁定在本机">
                         <span id="chat-identity-chip">未认领</span>
-                        <button class="chip-swap" onclick="requestIdentityChange()" title="更换身份（需队长口令）">换</button>
+                        <button class="chip-swap" onclick="openIdentityMenu()" title="更改名字 / 换成其他人">✏️</button>
                     </span>
                     <input type="text" id="chat-msg" class="chat-text-input" placeholder="输入你想和大家说的话..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                    <span class="emoji-wrap">
+                        <button class="emoji-btn" type="button" onclick="toggleEmojiPanel()" aria-label="插入表情" title="插入表情">😊</button>
+                        <div class="emoji-panel" id="emoji-panel"></div>
+                    </span>
                     <button class="btn-glow" onclick="sendChatMessage()">发送</button>
                 </div>
             </div>
@@ -820,7 +1174,9 @@
             </div>
 
             <div class="expense-form">
-                <div class="exp-payer-fixed">付款人：<strong id="exp-payer-label">未认领</strong></div>
+                <div class="exp-payer-fixed">付款人：<strong id="exp-payer-label">未认领</strong>
+                    <button class="chip-swap" type="button" onclick="openIdentityMenu()" title="更改名字 / 换成其他人" style="margin-left: auto;">✏️</button>
+                </div>
                 <select id="exp-category">
                     <option value="🏨 住宿">🏨 住宿</option>
                     <option value="✈️ 机票/交通">✈️ 机票/交通</option>
@@ -1068,12 +1424,78 @@
         }
 
         // ============================================================
+        // ★ 进门口令（页面的第一道门，只改这一段就够了）
+        // ============================================================
+        const SITE_PASSWORD      = 'Norway2027';   // ← 改成你们想要的进门口令
+        const SITE_SESSION_KEY   = 'norway_unlock_session_v1';   // 只记在本次会话（关掉标签页就要重输）
+        const SITE_REMEMBER_KEY  = 'norway_unlock_device_v1';    // 勾了「记住这台设备」才会写这里
+
+        // 说明：口令和名单都写在这个 HTML 文件里，队友「查看网页源代码」就能看到。
+        // 它挡的是"把链接转发给别人、别人随手点进来"，不是专业防破解 —— 够用就好。
+
+        // ============================================================
         // ★ 队伍名单与身份规则（只改这一段就够了）
         // ============================================================
-        const TEAM = ['hhl', 'zmy', 'zyx'];      // ← 换成你们 3 个人的真实名字（人数也要对，人均就按这个算）
-        const CAPTAIN = 'hhl';                        // ← 队长，必须和 TEAM 里的写法完全一致
-        const CAPTAIN_PIN = '2027';                      // ← 队长口令：认领队长 / 更换身份时要输
-        const IDENTITY_KEY = 'norway_team_identity_v1';
+        const DEFAULT_TEAM    = ['hhl', 'zmy', 'zyx'];   // ← 默认名单（3 个人，人均按人数算）
+        const DEFAULT_CAPTAIN = 'hhl';                   // ← 队长，必须和名单里的写法完全一致
+        const CAPTAIN_PIN     = '2027';                  // ← 队长口令：认领队长 / 换人时要输
+        const IDENTITY_KEY    = 'norway_team_identity_v1';
+        const ROSTER_KEY      = 'norway_team_roster_v1'; // 名单的本机缓存
+        const MEMBERS_TABLE   = 'members';               // 云端名单表（可选，见 supabase_rename_setup.sql）
+
+        // 名单可能被改名改掉，所以是"活的"：优先取云端 members 表 → 其次本机缓存 → 最后默认名单
+        let roster = { names: DEFAULT_TEAM.slice(), captain: DEFAULT_CAPTAIN };
+
+        function isValidRoster(o) {
+            return o && Array.isArray(o.names) && o.names.length > 0
+                && o.names.every(n => typeof n === 'string' && n.trim());
+        }
+
+        function loadRosterCache() {
+            try {
+                const raw = localStorage.getItem(ROSTER_KEY);
+                if (!raw) return;
+                const o = JSON.parse(raw);
+                if (!isValidRoster(o)) return;
+                roster.names = o.names.slice();
+                roster.captain = roster.names.indexOf(o.captain) !== -1 ? o.captain : roster.names[0];
+            } catch (e) {
+                console.warn('本机名单缓存读取失败，暂用默认名单。', e);
+            }
+        }
+
+        function saveRosterCache() {
+            try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) {}
+        }
+
+        // 从云端 members 表取名单：三个人的设备看到的是同一份，改名后一起变
+        async function fetchMembers() {
+            if (!sb) return;
+
+            const { data, error } = await sb.from(MEMBERS_TABLE).select('*').order('id', { ascending: true });
+            if (error) {
+                console.warn('云端名单读取失败（members 表还没建 / 没权限），先按本机缓存名单走:', error.message);
+                return;
+            }
+
+            if (!data || !data.length) {
+                // 表是空的：把默认名单播进去，之后以表为准
+                const rows = DEFAULT_TEAM.map(n => ({ name: n, is_captain: n === DEFAULT_CAPTAIN }));
+                const { error: seedErr } = await sb.from(MEMBERS_TABLE).insert(rows);
+                if (seedErr) console.warn('云端名单初始化失败:', seedErr.message);
+                return;
+            }
+
+            roster.names = data.map(r => r.name);
+            const cap = data.find(r => r.is_captain);
+            roster.captain = cap ? cap.name : roster.names[0];
+
+            // 兜底：万一云端名单还没同步到这台设备的新名字，也不要把人踢出身份 —— 保留当前身份
+            const me = getIdentity();
+            if (me && roster.names.indexOf(me) === -1) roster.names.push(me);
+
+            saveRosterCache();
+        }
 
         // 本机身份：优先存 localStorage；万一浏览器禁用存储，就退化成"仅本次会话有效"
         let memoryIdentity = '';
@@ -1092,7 +1514,7 @@
             }
         }
 
-        function isCaptainDevice() { return getIdentity() === CAPTAIN; }
+        function isCaptainDevice() { return getIdentity() === roster.captain; }
 
         function askCaptainPin(reason) {
             const pin = prompt(reason + '\n\n请输入队长口令：');
@@ -1110,11 +1532,270 @@
             document.getElementById('exp-payer-label').textContent = label;
         }
 
+        // ============================================================
+        // 🔒 第一道门：进门口令
+        // ============================================================
+        let gateAttempts = 0;        // 连续输错次数
+        let gateLockUntil = 0;       // 连错 5 次后短暂锁定
+
+        function isSiteUnlocked() {
+            try { if (localStorage.getItem(SITE_REMEMBER_KEY) === 'ok') return true; } catch (e) {}
+            try { return sessionStorage.getItem(SITE_SESSION_KEY) === 'ok'; } catch (e) { return false; }
+        }
+
+        function unlockSiteUI() {
+            document.body.classList.remove('gate-locked');
+            const g = document.getElementById('site-gate');
+            if (g) g.style.display = 'none';
+        }
+
+        function showSiteGate(msg) {
+            const g = document.getElementById('site-gate');
+            if (!g) return;
+
+            // 口令门盖住身份门，避免两个弹层叠在一起
+            const ig = document.getElementById('identity-gate');
+            if (ig) ig.style.display = 'none';
+
+            document.body.classList.add('gate-locked');
+            g.style.display = 'flex';
+
+            const errEl = document.getElementById('site-gate-error');
+            if (errEl) errEl.textContent = msg || '';
+
+            const inp = document.getElementById('site-password');
+            if (inp) { inp.value = ''; setTimeout(() => inp.focus(), 60); }
+        }
+
+        function tryUnlockSite() {
+            const inp = document.getElementById('site-password');
+            if (!inp) return;
+            const errEl = document.getElementById('site-gate-error');
+            const card = document.getElementById('site-gate-card');
+
+            const now = Date.now();
+            if (now < gateLockUntil) {
+                if (errEl) errEl.textContent = `输错太多次了，请等 ${Math.ceil((gateLockUntil - now) / 1000)} 秒再试。`;
+                return;
+            }
+
+            if (inp.value.trim() !== SITE_PASSWORD) {
+                gateAttempts++;
+                inp.value = '';
+                if (card) { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
+                if (gateAttempts >= 5) {
+                    gateLockUntil = Date.now() + 60000;
+                    gateAttempts = 0;
+                    if (errEl) errEl.textContent = '连续输错 5 次，已锁定 60 秒。';
+                } else if (errEl) {
+                    errEl.textContent = `口令不对，再想想（第 ${gateAttempts} 次）。`;
+                }
+                inp.focus();
+                return;
+            }
+
+            gateAttempts = 0;
+            gateLockUntil = 0;
+
+            const remember = document.getElementById('site-remember');
+            try { sessionStorage.setItem(SITE_SESSION_KEY, 'ok'); } catch (e) {}
+            if (remember && remember.checked) {
+                try { localStorage.setItem(SITE_REMEMBER_KEY, 'ok'); } catch (e) {}
+            }
+
+            unlockSiteUI();
+            afterUnlock();
+        }
+
+        // ============================================================
+        // ✏️ 改名：本机生效 + 云端历史记录一起换名字
+        // ============================================================
+        const PENDING_RENAME_KEY = 'norway_pending_rename_v1';
+        let renameBusy = false;
+
+        function setPendingRename(from, to) {
+            try { localStorage.setItem(PENDING_RENAME_KEY, JSON.stringify({ from, to })); } catch (e) {}
+        }
+
+        function clearPendingRename() {
+            try { localStorage.removeItem(PENDING_RENAME_KEY); } catch (e) {}
+        }
+
+        // 只数一下有几行，用来判断"改名到底改没改到"（PostgREST 缺 UPDATE 策略时不报错、只是 0 行）
+        async function countRows(table, col, value) {
+            const { count, error } = await sb.from(table)
+                .select('id', { count: 'exact', head: true })
+                .eq(col, value);
+            if (error) return null;
+            return count == null ? null : count;
+        }
+
+        // 把云端所有署旧名字的记录改成新名字；返回哪些没成功
+        async function syncRenameEverywhere(oldName, newName) {
+            const jobs = [
+                ['聊天记录',          'messages',  'author',     { author: newName }],
+                ['账单',              'expenses',  'payer',      { payer: newName }],
+                ['打包清单·添加人',    CHECKLIST_TABLE, 'created_by', { created_by: newName }],
+                ['打包清单·打勾人',    CHECKLIST_TABLE, 'checked_by', { checked_by: newName }],
+                ['云端队伍名单',       MEMBERS_TABLE,   'name',       { name: newName }]
+            ];
+
+            const failed = [];
+            let changed = 0;
+
+            for (const [label, table, col, patch] of jobs) {
+                try {
+                    const before = await countRows(table, col, oldName);
+                    const res = await sb.from(table).update(patch).eq(col, oldName).select('id');
+
+                    if (res && res.error) { failed.push(`${label}：${res.error.message}`); continue; }
+                    if (Array.isArray(res && res.data)) changed += res.data.length;
+
+                    // 改之前有旧名字、改完还有 → 说明被 RLS 拦下了（返回 204 但不报错）
+                    const after = await countRows(table, col, oldName);
+                    if (before && after) {
+                        failed.push(`${label}：数据库缺少 UPDATE 权限策略，0 行被修改`);
+                    }
+                } catch (e) {
+                    failed.push(`${label}：${e && e.message ? e.message : e}`);
+                }
+            }
+
+            return { failed, changed };
+        }
+
+        // 上次改名没同步完 → 下次打开页面自动补同步（因为 {旧名 → 新名} 重复执行是安全的）
+        async function flushPendingRename() {
+            if (!sb) return;
+            let p = null;
+            try { p = JSON.parse(localStorage.getItem(PENDING_RENAME_KEY) || 'null'); } catch (e) {}
+            if (!p || !p.from || !p.to) return;
+
+            const { failed } = await syncRenameEverywhere(p.from, p.to);
+            if (!failed.length) {
+                clearPendingRename();
+                console.log(`上次没同步完的改名「${p.from} → ${p.to}」已补同步。`);
+                fetchMessages(); fetchExpenses(); fetchChecklist();
+            } else {
+                console.warn('补同步改名仍然失败:', failed.join(' / '));
+            }
+        }
+
+        async function performRename(newName) {
+            const oldName = getIdentity();
+            if (!oldName) return;
+
+            // 本机立刻生效：不等着网络
+            if (roster.captain === oldName) roster.captain = newName;
+            roster.names = roster.names.map(n => (n === oldName ? newName : n));
+            saveRosterCache();
+            setIdentity(newName);
+            applyIdentityToUI(newName);
+
+            if (!sb) {
+                alert(`名字已改成「${newName}」。\n\n现在没连上云端，历史记录里还是旧名字。`);
+                return;
+            }
+
+            const { failed, changed } = await syncRenameEverywhere(oldName, newName);
+
+            if (!failed.length) {
+                clearPendingRename();
+                alert(`改名成功 ✅\n\n「${oldName}」→「${newName}」\n已同步 ${changed} 条历史记录（聊天 / 账单 / 打包清单 / 云端名单）。`);
+            } else {
+                setPendingRename(oldName, newName);
+                alert(`名字已经改成「${newName}」，但有一部分历史记录没同步成功：\n\n· ${failed.join('\n· ')}\n\n`
+                    + '多半是数据库还没给这几张表开 UPDATE 策略（或 members 表还没建）。\n'
+                    + '请让队长在 Supabase 的 SQL Editor 里跑一次 supabase_rename_setup.sql，'
+                    + '之后刷新页面 —— 页面会自动把没同步完的补上。');
+            }
+
+            fetchMessages();
+            fetchExpenses();
+            fetchChecklist();
+        }
+
+        function openIdentityMenu() {
+            const cur = getIdentity();
+            if (!cur) { showIdentityGate(); return; }
+
+            const t = document.getElementById('identity-menu-title');
+            if (t) t.innerHTML = `当前身份：<span style="color: var(--blue-accent);">${escapeHtml(cur)}</span>`;
+
+            const m = document.getElementById('identity-menu');
+            if (m) m.style.display = 'flex';
+        }
+
+        function closeIdentityMenu() {
+            const m = document.getElementById('identity-menu');
+            if (m) m.style.display = 'none';
+        }
+
+        function openRenameGate() {
+            const cur = getIdentity();
+            closeIdentityMenu();
+            if (!cur) { showIdentityGate(); return; }
+
+            const a = document.getElementById('rename-old');
+            const b = document.getElementById('rename-old-2');
+            if (a) a.textContent = cur;
+            if (b) b.textContent = cur;
+
+            const inp = document.getElementById('rename-input');
+            const errEl = document.getElementById('rename-error');
+            if (inp) inp.value = '';
+            if (errEl) errEl.textContent = '';
+
+            const g = document.getElementById('rename-gate');
+            if (g) g.style.display = 'flex';
+            setTimeout(() => { if (inp) inp.focus(); }, 60);
+        }
+
+        function closeRenameGate() {
+            const g = document.getElementById('rename-gate');
+            if (g) g.style.display = 'none';
+        }
+
+        async function submitRename() {
+            if (renameBusy) return;
+
+            const oldName = getIdentity();
+            if (!oldName) { closeRenameGate(); showIdentityGate(); return; }
+
+            const inp = document.getElementById('rename-input');
+            const errEl = document.getElementById('rename-error');
+            const btn = document.getElementById('rename-submit');
+            const newName = (inp ? inp.value : '').trim().replace(/\s+/g, ' ');
+            const fail = (msg) => { if (errEl) errEl.textContent = msg; };
+
+            if (!newName) return fail('新名字不能留空。');
+            if (newName.length > 12) return fail('名字最长 12 个字。');
+            if (newName === oldName) return fail('新名字和现在的名字一样。');
+            if (roster.names.some(n => n !== oldName && n.toLowerCase() === newName.toLowerCase())) {
+                return fail(`队伍里已经有「${newName}」了，换个名字吧。`);
+            }
+
+            if (!confirm(`把「${oldName}」改名为「${newName}」？\n\n`
+                + '聊天记录、账单、打包清单里所有署「' + oldName + '」的记录都会一起换成新名字，全队同步。')) return;
+
+            renameBusy = true;
+            if (errEl) errEl.textContent = '正在同步历史记录…';
+            if (btn) { btn.disabled = true; btn.textContent = '同步中…'; }
+
+            try {
+                await performRename(newName);
+                closeRenameGate();
+            } finally {
+                renameBusy = false;
+                if (btn) { btn.disabled = false; btn.textContent = '确认改名'; }
+            }
+        }
+
         function showIdentityGate() {
             const gate = document.getElementById('identity-gate');
             const box = document.getElementById('identity-options');
 
-            box.innerHTML = TEAM.map(n =>
+            box.innerHTML = roster.names.map(n =>
                 `<button class="identity-opt" data-name="${escapeHtml(n)}">${escapeHtml(n)}</button>`
             ).join('');
 
@@ -1123,9 +1804,9 @@
                     const name = btn.getAttribute('data-name');
 
                     // 认领队长身份要先过口令，避免队友随手把队长占了
-                    if (name === CAPTAIN && !askCaptainPin(`「${CAPTAIN}」是队长身份，认领它需要口令。`)) return;
+                    if (name === roster.captain && !askCaptainPin(`「${roster.captain}」是队长身份，认领它需要口令。`)) return;
 
-                    if (!confirm(`确认你是「${name}」？\n\n认领后聊天和记账都会署这个名字，改名需要队长口令。`)) return;
+                    if (!confirm(`确认你是「${name}」？\n\n认领后聊天和记账都会署这个名字；想改名字点 ✏️，换成别人需要队长口令。`)) return;
 
                     setIdentity(name);
                     gate.style.display = 'none';
@@ -1139,6 +1820,8 @@
         }
 
         function requestIdentityChange() {
+            closeIdentityMenu();
+
             const cur = getIdentity();
 
             if (!cur) { showIdentityGate(); return; }
@@ -1151,7 +1834,7 @@
                 return;
             }
 
-            if (!askCaptainPin('身份已锁定在这台设备上，只有队长能更换。')) return;
+            if (!askCaptainPin('身份已锁定在这台设备上，换成别人需要队长同意。')) return;
 
             setIdentity('');
             showIdentityGate();
@@ -1159,7 +1842,7 @@
 
         function initIdentity() {
             const cur = getIdentity();
-            if (cur && TEAM.indexOf(cur) !== -1) {
+            if (cur && roster.names.indexOf(cur) !== -1) {
                 applyIdentityToUI(cur);
             } else {
                 setIdentity('');
@@ -1248,6 +1931,13 @@
         function renderMessages(msgs) {
             const container = document.getElementById('chat-messages');
             const currentNick = getIdentity();
+
+            // 空状态：清空之后别留一片黑，否则看着像页面坏了
+            if (!msgs || !msgs.length) {
+                container.innerHTML = '<div class="chat-empty">🌌 聊天室里还没有消息<br>说点什么吧，比如「今晚有极光」</div>';
+                return;
+            }
+
             container.innerHTML = msgs.map(m => `
                 <div class="chat-msg ${m.author === currentNick ? 'me' : ''}">
                     <div class="meta">
@@ -1306,10 +1996,154 @@
             document.getElementById('chat-msg').value = text;
         }
 
+        // ============================================================
+        // 🧹 一键清空聊天室（标题右边那颗按钮）
+        // ------------------------------------------------------------
+        // 删的是云端 messages 表的全部消息，三个人的页面都会跟着空掉。
+        // 因为是"不可逆"操作，删之前先把整批消息读进内存当快照，
+        // 清空后聊天框下方会出现一条「撤销」条，15 秒内点一下就能原样写回去
+        // （只存在内存里，刷新/关掉页面就没了）。
+        // ============================================================
+        let clearedChatBackup = null;   // { mode: 'cloud' | 'local', rows: [...] }
+        let clearedChatTimer = null;
+        let clearChatBusy = false;
+
+        function setClearChatBusy(busy) {
+            clearChatBusy = busy;
+            const btn = document.getElementById('btn-clear-chat');
+            if (btn) {
+                btn.disabled = busy;
+                btn.textContent = busy ? '🧹 清空中…' : '🧹 清空聊天';
+            }
+        }
+
+        function showChatUndo(count) {
+            const bar = document.getElementById('chat-undo');
+            const text = document.getElementById('chat-undo-text');
+            const btn = document.getElementById('chat-undo-btn');
+            if (!bar || !text) return;
+            if (btn) btn.disabled = false;
+            text.textContent = `已清空 ${count} 条聊天记录。`;
+            bar.classList.add('show');
+            // 15 秒后自动收起——不给一份"永恒的后悔药"，免得以为消息还在
+            clearTimeout(clearedChatTimer);
+            clearedChatTimer = setTimeout(() => {
+                bar.classList.remove('show');
+                clearedChatBackup = null;
+            }, 15000);
+        }
+
+        function hideChatUndo() {
+            clearTimeout(clearedChatTimer);
+            const bar = document.getElementById('chat-undo');
+            if (bar) bar.classList.remove('show');
+            clearedChatBackup = null;
+        }
+
+        async function clearChatMessages() {
+            if (clearChatBusy) return;
+
+            const container = document.getElementById('chat-messages');
+            const visible = container ? container.querySelectorAll('.chat-msg').length : 0;
+            if (!visible) { alert('聊天室已经是空的了。'); return; }
+
+            if (!confirm(`确定清空聊天室吗？\n\n当前 ${visible} 条消息会被永久删除，其他队员的页面也会一起清空。`)) return;
+
+            // 没有云端连接（本机模拟模式）：只清本机
+            if (!sb) {
+                const rows = mockMessages.slice();
+                mockMessages = [];
+                renderMessages(mockMessages);
+                clearedChatBackup = { mode: 'local', rows: rows };
+                showChatUndo(rows.length);
+                return;
+            }
+
+            setClearChatBusy(true);
+            try {
+                // 先读一遍：既用来报条数，也当作撤销快照
+                const { data: snapshot, error: readErr } = await sb.from('messages')
+                    .select('*').order('created_at', { ascending: true });
+                if (readErr) { alert('读取聊天记录失败：' + readErr.message); return; }
+
+                if (!snapshot || !snapshot.length) {
+                    renderMessages([]);
+                    alert('云端聊天记录已经是空的了。');
+                    return;
+                }
+
+                // 带上 not('id','is',null) 而不是完全不加条件：PostgREST 会拒绝
+                // 没有任何 where 的 delete；这个条件对 bigint / uuid 两种主键都成立。
+                const { data: deleted, error: delErr } = await sb.from('messages')
+                    .delete().not('id', 'is', null).select('id');
+                if (delErr) { alert('清空失败：' + delErr.message); return; }
+
+                // RLS 里没有 delete 策略时，PostgREST 不报错、只是删掉 0 行（"假成功"）
+                if (!deleted || !deleted.length) {
+                    alert('没能删掉任何消息 —— 数据库还缺一条 DELETE 策略。\n\n' +
+                          '请在 Supabase → SQL Editor 里执行 supabase_checklist_setup.sql 的第 6 节，' +
+                          '开好 messages_delete 策略后再点一次。');
+                    return;
+                }
+
+                clearedChatBackup = { mode: 'cloud', rows: snapshot };
+                renderMessages([]);
+                showChatUndo(deleted.length);
+            } catch (e) {
+                console.error('清空聊天失败:', e);
+                alert('清空聊天失败：' + (e && e.message ? e.message : String(e)));
+            } finally {
+                setClearChatBusy(false);
+            }
+        }
+
+        async function undoClearChatMessages() {
+            if (!clearedChatBackup) return;
+
+            const backup = clearedChatBackup;
+            const btn = document.getElementById('chat-undo-btn');
+            if (btn) btn.disabled = true;
+
+            // 本机模式：把数组塞回去就行
+            if (backup.mode === 'local') {
+                mockMessages = backup.rows.slice();
+                renderMessages(mockMessages);
+                hideChatUndo();
+                if (btn) btn.disabled = false;
+                return;
+            }
+
+            // 云端：把快照重新插入（id 交给数据库重新分配，created_at 保留原来的时间）
+            const rows = backup.rows.map(r => {
+                const row = { author: r.author, text: r.text };
+                if (r.created_at) row.created_at = r.created_at;
+                return row;
+            });
+
+            try {
+                const { error } = await sb.from('messages').insert(rows);
+                if (error) {
+                    // 失败时保留快照和撤销条，还能再试一次
+                    alert('恢复失败：' + error.message + '\n\n撤销条还在，可以再点一次。');
+                    if (btn) btn.disabled = false;
+                    return;
+                }
+                hideChatUndo();
+                await fetchMessages();
+            } catch (e) {
+                alert('恢复失败：' + (e && e.message ? e.message : String(e)));
+                if (btn) btn.disabled = false;
+            }
+        }
+
         function subscribeChatRealtime() {
             if (!sb) return;
             sb.channel('public:messages')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
+                    fetchMessages();
+                })
+                // 有人清空聊天室时（DELETE），这边也要立刻跟着空掉，不用等 15 秒轮询
+                .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
                     fetchMessages();
                 })
                 .subscribe((status) => {
@@ -1345,7 +2179,7 @@
             }).join('');
 
             document.getElementById('exp-total-val').innerText = `￥${total.toLocaleString()}`;
-            document.getElementById('exp-per-person').innerText = `￥${Math.round(total / (TEAM.length || 1)).toLocaleString()} / 人`;
+            document.getElementById('exp-per-person').innerText = `￥${Math.round(total / (roster.names.length || 1)).toLocaleString()} / 人`;
         }
 
         async function fetchExpenses() {
@@ -1621,12 +2455,91 @@
             });
         }
 
-        // 初始化运行
-        document.addEventListener('DOMContentLoaded', () => {
-            initIdentity();          // 身份必须先就位，后面渲染才知道"哪条是我发的"
+        // ============================================================
+        // 7. 手机端导航（汉堡菜单）+ 聊天表情选择器
+        // ============================================================
 
-            updateDashboard();
-            setInterval(updateDashboard, 1000);
+        function toggleNavMenu() {
+            const menu = document.getElementById('nav-menu');
+            const btn = document.getElementById('nav-toggle');
+            if (!menu) return;
+            const open = menu.classList.toggle('open');
+            if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+
+        function closeNavMenu() {
+            const menu = document.getElementById('nav-menu');
+            const btn = document.getElementById('nav-toggle');
+            if (!menu) return;
+            menu.classList.remove('open');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+
+        function initNavMenu() {
+            const menu = document.getElementById('nav-menu');
+            if (!menu) return;
+            // 点某一节后自动收起
+            menu.querySelectorAll('.nav-link').forEach(a => a.addEventListener('click', closeNavMenu));
+            // 点空白处收起（汉堡按钮在 .navbar 里，不受影响）
+            document.addEventListener('click', (ev) => {
+                if (!ev.target.closest('.navbar')) closeNavMenu();
+            });
+            // 转横屏 / 拉宽到桌面尺寸时收起
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) closeNavMenu();
+            });
+        }
+
+        const EMOJIS = [
+            '😀', '😄', '😁', '😂', '🤣', '😊', '😍', '🥰',
+            '😎', '🤔', '🙃', '😴', '😭', '😅', '🥳', '🤩',
+            '😱', '🥶', '🥵', '🫠', '👍', '👏', '🙏', '🤝',
+            '💪', '✌️', '🫶', '❤️', '💖', '🔥', '✨', '⭐',
+            '🌈', '🌌', '❄️', '☃️', '⛷️', '🛷', '🎣', '🚗',
+            '✈️', '🏔️', '🐟', '🦌', '🍜', '🍺', '☕', '🎉',
+            '🎁', '💰', '📸', '🧣', '🧤', '🥾', '🔋', '🚨',
+            '⏰', '🎒', '🧳', '😋', '😜', '🫡', '👀', '🤙'
+        ];
+
+        function toggleEmojiPanel() {
+            const panel = document.getElementById('emoji-panel');
+            if (panel) panel.classList.toggle('open');
+        }
+
+        function insertEmoji(ch) {
+            const input = document.getElementById('chat-msg');
+            if (!input) return;
+            const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+            const end = input.selectionEnd == null ? input.value.length : input.selectionEnd;
+            input.value = input.value.slice(0, start) + ch + input.value.slice(end);
+            const pos = start + ch.length;   // 光标按 UTF-16 长度推进，代理对也不会错位
+            input.focus();
+            try { input.setSelectionRange(pos, pos); } catch (e) { /* 老浏览器忽略 */ }
+        }
+
+        function buildEmojiPanel() {
+            const panel = document.getElementById('emoji-panel');
+            if (!panel) return;
+            panel.innerHTML = EMOJIS
+                .map(e => `<button type="button" onclick="insertEmoji('${e}')">${e}</button>`)
+                .join('');
+            document.addEventListener('click', (ev) => {
+                if (!ev.target.closest('.emoji-wrap')) panel.classList.remove('open');
+            });
+        }
+
+        // ============================================================
+        // 解锁之后才做的事：取名单 → 认领身份 → 拉数据
+        // （重复解锁只跑一次订阅和轮询，靠 dataStarted 兜住）
+        // ============================================================
+        let dataStarted = false;
+
+        async function afterUnlock() {
+            await fetchMembers();    // 云端名单优先，拿到之后再判断"我是谁"
+            initIdentity();
+
+            if (dataStarted) return;
+            dataStarted = true;
 
             fetchMessages();
             subscribeChatRealtime();
@@ -1644,6 +2557,25 @@
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) fetchChecklist();
             });
+
+            // 上次改名要是没同步完，这里自动补上
+            flushPendingRename();
+        }
+
+        // 初始化运行
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavMenu();
+            buildEmojiPanel();
+
+            updateDashboard();
+            setInterval(updateDashboard, 1000);
+
+            loadRosterCache();       // 先用本机缓存/默认名单，网络慢也不挡路
+
+            // 第一道门：没解锁就停在口令页，不加载任何数据
+            if (!isSiteUnlocked()) { showSiteGate(''); return; }
+
+            afterUnlock();
         });
     </script>
 </body>
