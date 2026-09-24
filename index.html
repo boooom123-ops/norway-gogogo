@@ -351,7 +351,6 @@
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
         }
 
-        .chat-nick-input { width: 110px; }
         .chat-text-input { flex-grow: 1; }
 
         .btn-glow {
@@ -566,6 +565,74 @@
         .checklist input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-weight: bold; font-size: 13px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .checklist li.completed span { text-decoration: line-through; color: var(--text-muted); }
 
+        /* 🔐 身份认领与锁定 */
+        .identity-gate {
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(5, 6, 10, 0.88);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+
+        .identity-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            max-width: 430px; width: 100%;
+            text-align: center;
+            box-shadow: var(--glow-card-hover);
+        }
+
+        .identity-badge {
+            display: inline-block; color: var(--blue-accent);
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            padding: 4px 14px; border-radius: 20px;
+            font-size: 0.78em; font-weight: 700; margin-bottom: 14px;
+        }
+
+        .identity-card h3 { font-size: 1.25em; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
+        .identity-hint { color: var(--text-sub); font-size: 0.85em; line-height: 1.7; }
+        .identity-warn { color: var(--text-muted); font-size: 0.78em; margin-top: 16px; }
+        .identity-options { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0 4px; }
+
+        .identity-opt {
+            background: rgba(157, 78, 221, 0.18);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px 22px; border-radius: var(--radius-md);
+            font-size: 1em; font-weight: 700; cursor: pointer;
+            font-family: inherit; transition: all 0.25s ease;
+        }
+
+        .identity-opt:hover { border-color: var(--blue-accent); color: var(--blue-accent); box-shadow: var(--glow-blue); }
+
+        .identity-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            color: var(--blue-accent);
+            border-radius: var(--radius-sm);
+            padding: 9px 10px; font-size: 0.85em; font-weight: 700; white-space: nowrap;
+        }
+
+        .chip-swap {
+            background: transparent; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 0.95em; padding: 0 2px; font-family: inherit;
+        }
+
+        .chip-swap:hover { color: var(--pink-accent); }
+
+        .exp-payer-fixed {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.28);
+            color: var(--text-sub);
+            padding: 10px; border-radius: var(--radius-sm);
+            font-size: 0.88em; display: flex; align-items: center; gap: 4px;
+        }
+
+        .exp-payer-fixed strong { color: var(--blue-accent); }
+
         footer { text-align: center; color: var(--text-muted); font-size: 0.88em; margin-top: 50px; font-weight: 500; }
 
         @media (max-width: 768px) {
@@ -599,6 +666,17 @@
             </ul>
         </div>
     </nav>
+
+    <!-- 🔐 身份认领（首次进入时出现，认领后记在本机） -->
+    <div class="identity-gate" id="identity-gate" style="display: none;">
+        <div class="identity-card">
+            <div class="identity-badge">🔐 身份认领</div>
+            <h3>你是队伍里的谁？</h3>
+            <p class="identity-hint">选好后会记住在这台设备上，之后发消息、记账都自动署你的名字，不用再手填。</p>
+            <div class="identity-options" id="identity-options"></div>
+            <p class="identity-hint identity-warn" id="identity-footnote">认领后身份即锁定，改名需要队长口令。</p>
+        </div>
+    </div>
 
     <!-- Header 顶部标题 -->
     <header class="container">
@@ -649,7 +727,10 @@
                     <button class="chip-btn" onclick="insertPreset('🍰 Birthday Time 快乐！')">🍰 庆祝一下</button>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" id="chat-nick" class="chat-nick-input" placeholder="昵称" value="队友">
+                    <span class="identity-chip" title="身份已锁定在本机">
+                        <span id="chat-identity-chip">未认领</span>
+                        <button class="chip-swap" onclick="requestIdentityChange()" title="更换身份（需队长口令）">换</button>
+                    </span>
                     <input type="text" id="chat-msg" class="chat-text-input" placeholder="输入你想和大家说的话..." onkeydown="if(event.key==='Enter') sendChatMessage()">
                     <button class="btn-glow" onclick="sendChatMessage()">发送</button>
                 </div>
@@ -698,7 +779,7 @@
             </div>
 
             <div class="expense-form">
-                <input type="text" id="exp-payer" placeholder="付款人 (如: 小明)">
+                <div class="exp-payer-fixed">付款人：<strong id="exp-payer-label">未认领</strong></div>
                 <select id="exp-category">
                     <option value="🏨 住宿">🏨 住宿</option>
                     <option value="✈️ 机票/交通">✈️ 机票/交通</option>
@@ -947,6 +1028,107 @@
             console.warn("未配置 Supabase 秘钥或 SDK 未加载，已自动开启本地模拟模式。");
         }
 
+        // ============================================================
+        // ★ 队伍名单与身份规则（只改这一段就够了）
+        // ============================================================
+        const TEAM = ['hhl', 'zmy', 'zyx'];      // ← 换成你们 3 个人的真实名字（人数也要对，人均就按这个算）
+        const CAPTAIN = 'hhl';                        // ← 队长，必须和 TEAM 里的写法完全一致
+        const CAPTAIN_PIN = '2027';                      // ← 队长口令：认领队长 / 更换身份时要输
+        const IDENTITY_KEY = 'norway_team_identity_v1';
+
+        // 本机身份：优先存 localStorage；万一浏览器禁用存储，就退化成"仅本次会话有效"
+        let memoryIdentity = '';
+
+        function getIdentity() {
+            try { return localStorage.getItem(IDENTITY_KEY) || memoryIdentity; } catch (e) { return memoryIdentity; }
+        }
+
+        function setIdentity(name) {
+            memoryIdentity = name || '';
+            try {
+                if (name) localStorage.setItem(IDENTITY_KEY, name);
+                else localStorage.removeItem(IDENTITY_KEY);
+            } catch (e) {
+                console.warn('本机存储不可用，身份只在本次会话内有效。', e);
+            }
+        }
+
+        function isCaptainDevice() { return getIdentity() === CAPTAIN; }
+
+        function askCaptainPin(reason) {
+            const pin = prompt(reason + '\n\n请输入队长口令：');
+            if (pin === null) return false;
+            if (pin.trim() !== CAPTAIN_PIN) {
+                alert('口令不对，身份保持不变。');
+                return false;
+            }
+            return true;
+        }
+
+        function applyIdentityToUI(name) {
+            const label = name || '未认领';
+            document.getElementById('chat-identity-chip').textContent = label;
+            document.getElementById('exp-payer-label').textContent = label;
+        }
+
+        function showIdentityGate() {
+            const gate = document.getElementById('identity-gate');
+            const box = document.getElementById('identity-options');
+
+            box.innerHTML = TEAM.map(n =>
+                `<button class="identity-opt" data-name="${escapeHtml(n)}">${escapeHtml(n)}</button>`
+            ).join('');
+
+            box.querySelectorAll('.identity-opt').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const name = btn.getAttribute('data-name');
+
+                    // 认领队长身份要先过口令，避免队友随手把队长占了
+                    if (name === CAPTAIN && !askCaptainPin(`「${CAPTAIN}」是队长身份，认领它需要口令。`)) return;
+
+                    if (!confirm(`确认你是「${name}」？\n\n认领后聊天和记账都会署这个名字，改名需要队长口令。`)) return;
+
+                    setIdentity(name);
+                    gate.style.display = 'none';
+                    applyIdentityToUI(name);
+                    fetchMessages();
+                    fetchExpenses();
+                });
+            });
+
+            gate.style.display = 'flex';
+        }
+
+        function requestIdentityChange() {
+            const cur = getIdentity();
+
+            if (!cur) { showIdentityGate(); return; }
+
+            if (isCaptainDevice()) {
+                if (confirm('队长模式：要为这台设备重新选择身份吗？')) {
+                    setIdentity('');
+                    showIdentityGate();
+                }
+                return;
+            }
+
+            if (!askCaptainPin('身份已锁定在这台设备上，只有队长能更换。')) return;
+
+            setIdentity('');
+            showIdentityGate();
+        }
+
+        function initIdentity() {
+            const cur = getIdentity();
+            if (cur && TEAM.indexOf(cur) !== -1) {
+                applyIdentityToUI(cur);
+            } else {
+                setIdentity('');
+                applyIdentityToUI('');
+                showIdentityGate();
+            }
+        }
+
         // 1. Canvas 星空
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
@@ -1026,7 +1208,7 @@
 
         function renderMessages(msgs) {
             const container = document.getElementById('chat-messages');
-            const currentNick = document.getElementById('chat-nick').value || '队友';
+            const currentNick = getIdentity();
             container.innerHTML = msgs.map(m => `
                 <div class="chat-msg ${m.author === currentNick ? 'me' : ''}">
                     <div class="meta">
@@ -1055,10 +1237,11 @@
         }
 
         async function sendChatMessage() {
-            const nick = document.getElementById('chat-nick').value.trim() || '队友';
+            const nick = getIdentity();
             const msgInput = document.getElementById('chat-msg');
             const text = msgInput.value.trim();
 
+            if (!nick) { alert('请先认领你的身份，再发言。'); showIdentityGate(); return; }
             if (!text) return;
 
             const nowStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -1123,7 +1306,7 @@
             }).join('');
 
             document.getElementById('exp-total-val').innerText = `￥${total.toLocaleString()}`;
-            document.getElementById('exp-per-person').innerText = `￥${Math.round(total / 3).toLocaleString()} / 人`;
+            document.getElementById('exp-per-person').innerText = `￥${Math.round(total / (TEAM.length || 1)).toLocaleString()} / 人`;
         }
 
         async function fetchExpenses() {
@@ -1141,10 +1324,12 @@
         }
 
         async function addExpense() {
-            const payer = document.getElementById('exp-payer').value.trim() || '队友';
+            const payer = getIdentity();
             const category = document.getElementById('exp-category').value;
             const amount = parseFloat(document.getElementById('exp-amount').value);
             const title = document.getElementById('exp-title').value.trim() || '日常消费';
+
+            if (!payer) { alert('请先认领你的身份，再记账。'); showIdentityGate(); return; }
 
             if (!amount || amount <= 0) {
                 alert("请输入正确的金额！");
@@ -1205,6 +1390,8 @@
 
         // 初始化运行
         document.addEventListener('DOMContentLoaded', () => {
+            initIdentity();          // 身份必须先就位，后面渲染才知道"哪条是我发的"
+
             updateDashboard();
             setInterval(updateDashboard, 1000);
 
