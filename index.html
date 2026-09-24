@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2027 挪威极圈山海追光之旅 - 极光小队中心</title>
+    <title>2027 挪威发呆计划</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -921,14 +921,30 @@
         // 🔑 在这里替换你从 Supabase Dashboard 复制的两个值：
         // ============================================================
         const SUPABASE_URL = 'https://tjeinpfnpurplkicnelj.supabase.co'; // 替换你的 Project URL
-        const SUPABASE_ANON_KEY =  'sb_publishable_-iw4OqsuippfTivfBXJMHw_iAiFki_L'; // 替换你的 anon key
+        const SUPABASE_ANON_KEY =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqZWlucGZucHVycGxraWNuZWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwODQwMTYsImV4cCI6MjEwNDY2MDAxNn0.RGZeT0HZ2mDICxroqZN1BLpr09Bu1rFlaU0ljX3brtU';// 替换你的 anon key
 
-        let supabase = null;
-        if (SUPABASE_URL !== 'https://tjeinpfnpurplkicnelj.supabase.co' && window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log("Supabase 初始化成功！");
+        // ⚠️ 重要：CDN 版 SDK 本身已经占用了全局名字 supabase。
+        // 这里如果再用 let / const / var 声明一个叫 supabase 的变量，
+        // 浏览器会直接抛出 SyntaxError，导致整段 <script> 一行都不执行
+        // （聊天室、记账、倒计时、星空、清单会全部失效）。
+        // 所以客户端实例必须换个名字，下面统一用 sb。
+        const SUPABASE_SDK = window.supabase;
+        let sb = null;
+
+        if (SUPABASE_SDK && SUPABASE_URL && SUPABASE_ANON_KEY) {
+            try {
+                // persistSession/autoRefreshToken 关掉：本页没有登录态，
+                // 可避免 Edge「跟踪防护」拦截第三方存储时的告警与异常。
+                sb = SUPABASE_SDK.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: { persistSession: false, autoRefreshToken: false }
+                });
+                console.log("Supabase 初始化成功！");
+            } catch (e) {
+                console.error("Supabase 初始化失败，切回本地模拟模式:", e);
+                sb = null;
+            }
         } else {
-            console.warn("未配置 Supabase 秘钥，已自动开启 Local Storage 本地模拟模式。");
+            console.warn("未配置 Supabase 秘钥或 SDK 未加载，已自动开启本地模拟模式。");
         }
 
         // 1. Canvas 星空
@@ -993,25 +1009,46 @@
             { id: 2, author: "队友A", text: "超级期待 2.23 的海鲜盛宴 🍰！", time: "10:15" }
         ];
 
+        // 防止队友输入的 < > 等字符破坏页面 / 注入脚本
+        function escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        // 本地模拟消息用 time 字段，数据库消息用 created_at
+        function formatMsgTime(m) {
+            if (m.time) return escapeHtml(m.time);
+            if (!m.created_at) return '';
+            const d = new Date(m.created_at);
+            return isNaN(d.getTime()) ? '' : d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+
         function renderMessages(msgs) {
             const container = document.getElementById('chat-messages');
             const currentNick = document.getElementById('chat-nick').value || '队友';
             container.innerHTML = msgs.map(m => `
                 <div class="chat-msg ${m.author === currentNick ? 'me' : ''}">
                     <div class="meta">
-                        <span class="author">${m.author}</span>
-                        <span>${m.time || ''}</span>
+                        <span class="author">${escapeHtml(m.author)}</span>
+                        <span>${formatMsgTime(m)}</span>
                     </div>
-                    <div class="text">${m.text}</div>
+                    <div class="text">${escapeHtml(m.text)}</div>
                 </div>
             `).join('');
             container.scrollTop = container.scrollHeight;
         }
 
         async function fetchMessages() {
-            if (supabase) {
-                const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
-                if (!error && data) renderMessages(data);
+            if (sb) {
+                const { data, error } = await sb.from('messages').select('*').order('created_at', { ascending: true });
+                if (error) {
+                    // 以前这里出错就什么都不渲染，看上去就像"没反应"。
+                    console.error('读取聊天记录失败:', error.message);
+                    renderMessages(mockMessages);
+                } else {
+                    renderMessages(data || []);
+                }
             } else {
                 renderMessages(mockMessages);
             }
@@ -1026,8 +1063,15 @@
 
             const nowStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
-            if (supabase) {
-                await supabase.from('messages').insert([{ author: nick, text: text }]);
+            if (sb) {
+                const { error } = await sb.from('messages').insert([{ author: nick, text: text }]);
+                if (error) {
+                    console.error('发送失败:', error.message);
+                    alert('消息发送失败：' + error.message);
+                    return; // 失败时保留输入框内容，避免消息丢了
+                }
+                // 不依赖 Realtime 也能立刻看到自己发出去的消息
+                await fetchMessages();
             } else {
                 mockMessages.push({ id: Date.now(), author: nick, text: text, time: nowStr });
                 renderMessages(mockMessages);
@@ -1041,13 +1085,16 @@
         }
 
         function subscribeChatRealtime() {
-            if (supabase) {
-                supabase.channel('public:messages')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
-                        fetchMessages();
-                    })
-                    .subscribe();
-            }
+            if (!sb) return;
+            sb.channel('public:messages')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
+                    fetchMessages();
+                })
+                .subscribe((status) => {
+                    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                        console.warn('Realtime 订阅未生效（需在 Supabase 里为该表开启 Realtime），已由手动拉取兜底。', status);
+                    }
+                });
         }
 
         // 4. AA 记账
@@ -1061,15 +1108,16 @@
             let total = 0;
 
             listEl.innerHTML = expenses.map(e => {
-                total += parseFloat(e.amount);
+                const amt = parseFloat(e.amount) || 0;
+                total += amt;
                 return `
                     <li class="expense-item">
                         <div>
-                            <span class="tag">${e.category}</span>
-                            <strong>${e.title}</strong>
-                            <span style="color: var(--text-sub); font-size: 0.85em; margin-left: 8px;">(${e.payer} 垫付)</span>
+                            <span class="tag">${escapeHtml(e.category)}</span>
+                            <strong>${escapeHtml(e.title)}</strong>
+                            <span style="color: var(--text-sub); font-size: 0.85em; margin-left: 8px;">(${escapeHtml(e.payer)} 垫付)</span>
                         </div>
-                        <div style="font-weight: 800; color: var(--pink-accent);">￥${parseFloat(e.amount).toLocaleString()}</div>
+                        <div style="font-weight: 800; color: var(--pink-accent);">￥${amt.toLocaleString()}</div>
                     </li>
                 `;
             }).join('');
@@ -1079,9 +1127,14 @@
         }
 
         async function fetchExpenses() {
-            if (supabase) {
-                const { data, error } = await supabase.from('expenses').select('*').order('created_at', { ascending: false });
-                if (!error && data) renderExpenses(data);
+            if (sb) {
+                const { data, error } = await sb.from('expenses').select('*').order('created_at', { ascending: false });
+                if (error) {
+                    console.error('读取账单失败:', error.message);
+                    renderExpenses(mockExpenses);
+                } else {
+                    renderExpenses(data || []);
+                }
             } else {
                 renderExpenses(mockExpenses);
             }
@@ -1098,9 +1151,14 @@
                 return;
             }
 
-            if (supabase) {
-                await supabase.from('expenses').insert([{ payer, category, amount, title }]);
-                fetchExpenses();
+            if (sb) {
+                const { error } = await sb.from('expenses').insert([{ payer, category, amount, title }]);
+                if (error) {
+                    console.error('记账失败:', error.message);
+                    alert('记账失败：' + error.message);
+                    return;
+                }
+                await fetchExpenses();
             } else {
                 mockExpenses.unshift({ id: Date.now(), payer, category, amount, title });
                 renderExpenses(mockExpenses);
@@ -1152,6 +1210,9 @@
 
             fetchMessages();
             subscribeChatRealtime();
+            // 兜底轮询：即使 Supabase 里没给 messages 表开启 Realtime，
+            // 队友发的新消息也会自动出现，不需要手动刷新页面。
+            setInterval(() => { if (!document.hidden) fetchMessages(); }, 15000);
 
             fetchExpenses();
             loadChecklistState();
