@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Supabase JS SDK -->
+    <!-- Supabase JS SDK (通过 CDN 引入) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -16,28 +16,22 @@
            高级星空粉紫蓝黑 Theme (Deep Cyber Galaxy)
            ========================================= */
         :root {
-            /* 基础深背景 */
             --bg-dark: #05060A;             /* 深空极夜黑 */
             --card-bg: rgba(22, 18, 38, 0.65); /* 半透明暗紫玻璃 */
             --card-border: rgba(157, 78, 221, 0.25); /* 霓虹紫柔和边框 */
             
-            /* 文字颜色 */
             --text-main: #FFFFFF;
             --text-sub: #D8C7FF;           /* 梦幻淡紫文本 */
             --text-muted: #8E82B0;
 
-            /* 主题核心发光色 */
             --pink-accent: #FF55AA;        /* 极光霓虹粉 */
             --purple-accent: #9D4EDD;      /* 璀璨星体紫 */
             --blue-accent: #00F0FF;        /* 电光极冰蓝 */
             --green-accent: #00FFAB;       /* 极光荧光绿 */
 
-            /* 渐变组合 */
             --grad-cyber-title: linear-gradient(135deg, #FF66C4 0%, #B5179E 45%, #00F0FF 100%);
             --grad-badge-pink: linear-gradient(135deg, rgba(255, 85, 170, 0.2), rgba(157, 78, 221, 0.2));
-            --grad-badge-blue: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
 
-            /* 高级发光阴影 */
             --glow-pink: 0 0 20px rgba(255, 85, 170, 0.35);
             --glow-blue: 0 0 20px rgba(0, 240, 255, 0.35);
             --glow-green: 0 0 20px rgba(0, 255, 171, 0.35);
@@ -69,7 +63,7 @@
             position: relative;
         }
 
-        /* ---------------- 星空背景与星云 ---------------- */
+        /* 星空背景与星云 */
         #starfield {
             position: fixed;
             top: 0;
@@ -99,7 +93,7 @@
             100% { transform: scale(1.15) translate(20px, 15px); opacity: 0.35; }
         }
 
-        /* ---------------- 吸顶导航栏 Navbar ---------------- */
+        /* 吸顶导航栏 Navbar */
         .navbar {
             position: sticky;
             top: 0;
@@ -147,9 +141,6 @@
             padding: 6px 12px;
             border-radius: var(--radius-sm);
             transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -167,7 +158,7 @@
             z-index: 1;
         }
 
-        /* ---------------- Header 标题区 ---------------- */
+        /* Header 标题区 */
         header {
             padding: 45px 20px 30px;
             text-align: center;
@@ -207,7 +198,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* ---------------- Dashboard 看板 ---------------- */
+        /* Dashboard 看板 */
         .dashboard-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -248,19 +239,10 @@
             flex-shrink: 0;
         }
 
-        .dash-card .val {
-            font-size: 1.25em;
-            font-weight: 800;
-            color: var(--text-main);
-        }
+        .dash-card .val { font-size: 1.25em; font-weight: 800; color: var(--text-main); }
+        .dash-card .lbl { font-size: 0.8em; color: var(--text-sub); font-weight: 600; }
 
-        .dash-card .lbl {
-            font-size: 0.8em;
-            color: var(--text-sub);
-            font-weight: 600;
-        }
-
-        /* ---------------- Glass Card 通用玻璃卡片 ---------------- */
+        /* Glass Card 通用玻璃卡片 */
         .glass-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -297,7 +279,7 @@
             gap: 10px;
         }
 
-        /* ---------------- 💬 追光聊天室模块 ---------------- */
+        /* 💬 追光聊天室模块 */
         .chat-container {
             display: flex;
             flex-direction: column;
@@ -341,20 +323,9 @@
             gap: 12px;
         }
 
-        .chat-msg .author {
-            font-weight: 700;
-            color: var(--pink-accent);
-        }
-
-        .chat-msg.me .author {
-            color: var(--blue-accent);
-        }
-
-        .chat-msg .text {
-            font-size: 0.92em;
-            color: var(--text-main);
-            word-break: break-word;
-        }
+        .chat-msg .author { font-weight: 700; color: var(--pink-accent); }
+        .chat-msg.me .author { color: var(--blue-accent); }
+        .chat-msg .text { font-size: 0.92em; color: var(--text-main); word-break: break-word; }
 
         .chat-input-area {
             padding: 12px;
@@ -396,10 +367,7 @@
             white-space: nowrap;
         }
 
-        .btn-glow:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
+        .btn-glow:hover { opacity: 0.9; transform: translateY(-1px); }
 
         .chat-presets {
             display: flex;
@@ -420,12 +388,9 @@
             transition: all 0.2s;
         }
 
-        .chip-btn:hover {
-            color: var(--blue-accent);
-            border-color: var(--blue-accent);
-        }
+        .chip-btn:hover { color: var(--blue-accent); border-color: var(--blue-accent); }
 
-        /* ---------------- 💰 团队记账模块 ---------------- */
+        /* 💰 团队记账模块 */
         .expense-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -494,7 +459,7 @@
             margin-right: 8px;
         }
 
-        /* ---------------- 🌌 极光指数与气象看板 ---------------- */
+        /* 🌌 极光指数与气象看板 */
         .aurora-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -517,7 +482,7 @@
             margin: 6px 0;
         }
 
-        /* ---------------- Timeline 行程时间线 ---------------- */
+        /* Timeline 行程时间线 */
         .day-card {
             display: flex;
             background: var(--card-bg);
@@ -557,7 +522,7 @@
         .day-body h4 { color: var(--pink-accent); font-size: 0.92em; margin: 10px 0 3px; font-weight: 700; }
         .day-body p { color: var(--text-sub); font-size: 0.92em; }
 
-        /* ---------------- 避坑与联系电话 ---------------- */
+        /* 避坑与联系电话 */
         .tips-card { border-left: 4px solid var(--pink-accent); }
         .tip-item h5 { color: var(--pink-accent); font-size: 1em; margin: 12px 0 4px; font-weight: 700; }
         .tip-item p { color: var(--text-sub); font-size: 0.92em; }
@@ -580,7 +545,7 @@
         .contact-btn:hover { background: rgba(157, 78, 221, 0.2); border-color: var(--blue-accent); box-shadow: var(--glow-blue); }
         .contact-btn .copy-tag { font-size: 0.8em; background: rgba(0, 240, 255, 0.15); padding: 3px 8px; border-radius: 6px; color: var(--blue-accent); border: 1px solid rgba(0, 240, 255, 0.3); font-weight: 700; }
 
-        /* ---------------- Checklist ---------------- */
+        /* Checklist */
         .checklist { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
         .checklist li {
             background: rgba(9, 10, 15, 0.5);
@@ -604,7 +569,7 @@
         footer { text-align: center; color: var(--text-muted); font-size: 0.88em; margin-top: 50px; font-weight: 500; }
 
         @media (max-width: 768px) {
-            .nav-menu { display: none; } /* 移动端导航精简 */
+            .nav-menu { display: none; }
             .day-card { flex-direction: column; }
             .day-badge { flex-direction: row; gap: 12px; padding: 12px; border-right: none; border-bottom: 1px solid var(--card-border); }
         }
@@ -676,9 +641,7 @@
                 <span style="font-size: 0.6em; color: var(--green-accent); font-weight: 600;">● Live Realtime</span>
             </h2>
             <div class="chat-container">
-                <div class="chat-messages" id="chat-messages">
-                    <!-- 动态聊天消息卡片 -->
-                </div>
+                <div class="chat-messages" id="chat-messages"></div>
                 <div class="chat-presets">
                     <button class="chip-btn" onclick="insertPreset('🌌 天空放晴了，快出来看极光！')">🌌 今晚有极光！</button>
                     <button class="chip-btn" onclick="insertPreset('🛒 我要去 REMA 1000 采购，谁要带东西？')">🛒 超市采购</button>
@@ -748,9 +711,7 @@
                 <button class="btn-glow" onclick="addExpense()">记一笔</button>
             </div>
 
-            <ul class="expense-list" id="expense-list">
-                <!-- 动态记账列表 -->
-            </ul>
+            <ul class="expense-list" id="expense-list"></ul>
         </div>
 
         <!-- 行程时间线 Timeline -->
@@ -957,22 +918,20 @@
     <!-- JavaScript 逻辑脚本 -->
     <script>
         // ============================================================
-        // 0. Supabase 配置初始化 (填写你的 Supabase URL 与 Anon Key)
+        // 🔑 在这里替换你从 Supabase Dashboard 复制的两个值：
         // ============================================================
-        const SUPABASE_URL = 'https://tjeinpfnpurplkicnelj.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_-iw4OqsuippfTivfBXJMHw_iAiFki_L';
+        const SUPABASE_URL = 'https://tjeinpfnpurplkicnelj.supabase.co'; // 替换你的 Project URL
+        const SUPABASE_ANON_KEY =  'sb_publishable_-iw4OqsuippfTivfBXJMHw_iAiFki_L'; // 替换你的 anon key
 
         let supabase = null;
-        if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && window.supabase) {
+        if (SUPABASE_URL !== 'https://tjeinpfnpurplkicnelj.supabase.co' && window.supabase) {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log("Supabase 初始化成功！");
         } else {
-            console.warn("未检测到 Supabase 配置，已启用本地模拟 (Fallback) 模式。");
+            console.warn("未配置 Supabase 秘钥，已自动开启 Local Storage 本地模拟模式。");
         }
 
-        // ============================================================
-        // 1. Canvas 动态梦幻星空生成器
-        // ============================================================
+        // 1. Canvas 星空
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
         let stars = [];
@@ -1015,9 +974,7 @@
         resizeCanvas();
         drawStars();
 
-        // ============================================================
-        // 2. 出发倒计时 & 挪威当地时间
-        // ============================================================
+        // 2. 倒计时与时间
         function updateDashboard() {
             const targetDate = new Date('2027-02-20T00:00:00');
             const now = new Date();
@@ -1030,12 +987,10 @@
             document.getElementById('norway-time').innerText = norwayTimeString;
         }
 
-        // ============================================================
-        // 3. 💬 追光聊天室逻辑 (含 Supabase Realtime)
-        // ============================================================
+        // 3. 聊天室
         let mockMessages = [
             { id: 1, author: "追光队长", text: "欢迎来到 2027 挪威发呆计划协同中心！", time: "10:00" },
-            { id: 2, author: "队友A", text: "超级期待 2.23 的海鲜盛宴 cake 🍰！", time: "10:15" }
+            { id: 2, author: "队友A", text: "超级期待 2.23 的海鲜盛宴 🍰！", time: "10:15" }
         ];
 
         function renderMessages(msgs) {
@@ -1085,20 +1040,17 @@
             document.getElementById('chat-msg').value = text;
         }
 
-        // Subscribe Realtime
         function subscribeChatRealtime() {
             if (supabase) {
                 supabase.channel('public:messages')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
                         fetchMessages();
                     })
                     .subscribe();
             }
         }
 
-        // ============================================================
-        // 4. 💰 团队 AA 共享记账逻辑
-        // ============================================================
+        // 4. AA 记账
         let mockExpenses = [
             { id: 1, payer: "小明", category: "🏨 住宿", amount: 12000, title: "雷纳 Rorbu 木屋预订" },
             { id: 2, payer: "小红", category: "🚗 租车/加油", amount: 4500, title: "SVJ 机场 SUV 租金" }
@@ -1142,7 +1094,7 @@
             const title = document.getElementById('exp-title').value.trim() || '日常消费';
 
             if (!amount || amount <= 0) {
-                alert("请输入正确的消费金额！");
+                alert("请输入正确的金额！");
                 return;
             }
 
@@ -1158,9 +1110,7 @@
             document.getElementById('exp-title').value = '';
         }
 
-        // ============================================================
-        // 5. Checklist 本地 & 云端保存 (LocalStorage + Supabase)
-        // ============================================================
+        // 5. Checklist 本地保存
         const checklist = document.getElementById('travel-checklist');
         const checkboxes = checklist.querySelectorAll('input[type="checkbox"]');
 
@@ -1188,18 +1138,14 @@
             });
         });
 
-        // ============================================================
-        // 6. 点击复制文本
-        // ============================================================
+        // 6. 复制文字
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
                 alert(`已成功复制: ${text}`);
             });
         }
 
-        // ============================================================
-        // 7. 页面初始化
-        // ============================================================
+        // 初始化运行
         document.addEventListener('DOMContentLoaded', () => {
             updateDashboard();
             setInterval(updateDashboard, 1000);
