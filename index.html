@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2027 挪威极圈山海追光之旅</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           高级星空粉紫蓝黑 Theme (Deep Cyber Galaxy)
+           ========================================= */
+        :root {
+            /* 基础深背景 */
+            --bg-dark: #05060A;             /* 深空极夜黑 */
+            --card-bg: rgba(22, 18, 38, 0.65); /* 半透明暗紫玻璃 */
+            --card-border: rgba(157, 78, 221, 0.25); /* 霓虹紫柔和边框 */
+            
+            /* 文字颜色 */
+            --text-main: #FFFFFF;
+            --text-sub: #D8C7FF;           /* 梦幻淡紫文本 */
+            --text-muted: #8E82B0;
+
+            /* 主题核心发光色 */
+            --pink-accent: #FF55AA;        /* 极光霓虹粉 */
+            --purple-accent: #9D4EDD;      /* 璀璨星体紫 */
+            --blue-accent: #00F0FF;        /* 电光极冰蓝 */
+
+            /* 渐变组合 */
+            --grad-cyber-title: linear-gradient(135deg, #FF66C4 0%, #B5179E 45%, #00F0FF 100%);
+            --grad-badge-pink: linear-gradient(135deg, rgba(255, 85, 170, 0.2), rgba(157, 78, 221, 0.2));
+            --grad-badge-blue: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.2));
+
+            /* 高级发光阴影 */
+            --glow-pink: 0 0 20px rgba(255, 85, 170, 0.35);
+            --glow-blue: 0 0 20px rgba(0, 240, 255, 0.35);
+            --glow-card: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(157, 78, 221, 0.15);
+            --glow-card-hover: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.3);
+
+            --radius-lg: 18px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ---------------- 星空背景与星云 ---------------- */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* 动态发光星云光斑 */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.28;
+            animation: pulseNebula 12s infinite alternate ease-in-out;
+        }
+
+        .nebula-pink {
+            top: -10%;
+            left: 10%;
+            width: 500px;
+            height: 500px;
+            background: var(--pink-accent);
+        }
+
+        .nebula-blue {
+            bottom: 20%;
+            right: -5%;
+            width: 600px;
+            height: 600px;
+            background: var(--blue-accent);
+        }
+
+        .nebula-purple {
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 500px;
+            background: var(--purple-accent);
+        }
+
+        @keyframes pulseNebula {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.22; }
+            100% { transform: scale(1.15) translate(20px, 15px); opacity: 0.35; }
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ---------------- Header 标题区 ---------------- */
+        header {
+            padding: 55px 20px 35px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--grad-badge-pink);
+            color: var(--pink-accent);
+            border: 1px solid var(--pink-accent);
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+            box-shadow: var(--glow-pink);
+        }
+
+        .header-title {
+            font-size: 2.8em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF77D2 0%, #B5179E 40%, #00F0FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 30px rgba(181, 23, 158, 0.3);
+        }
+
+        .header-sub {
+            color: var(--text-sub);
+            font-size: 1.15em;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* ---------------- Dashboard 顶部信息面板 ---------------- */
+        .dashboard-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 18px 22px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--glow-card);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--blue-accent);
+            box-shadow: var(--glow-card-hover);
+        }
+
+        .dash-icon {
+            font-size: 1.8em;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue-accent);
+        }
+
+        .dash-card .val {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .dash-card .lbl {
+            font-size: 0.82em;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        /* ---------------- 通用 Glass Card 模块 ---------------- */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--glow-card);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.4);
+            box-shadow: var(--glow-card-hover);
+        }
+
+        h2.section-title {
+            font-size: 1.45em;
+            font-weight: 800;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--blue-accent);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 14px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        /* ---------------- 行程时间线 Timeline ---------------- */
+        .day-card {
+            display: flex;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 22px;
+            overflow: hidden;
+            box-shadow: var(--glow-card);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        .day-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--blue-accent);
+            box-shadow: var(--glow-card-hover);
+        }
+
+        .day-badge {
+            background: linear-gradient(180deg, rgba(157, 78, 221, 0.3) 0%, rgba(0, 240, 255, 0.15) 100%);
+            border-right: 1px solid var(--card-border);
+            padding: 25px 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-width: 105px;
+        }
+
+        .day-badge .d-num {
+            font-size: 1.6em;
+            font-weight: 800;
+            color: var(--pink-accent);
+            text-shadow: var(--glow-pink);
+        }
+
+        .day-badge .d-date {
+            font-size: 0.9em;
+            color: var(--blue-accent);
+            font-weight: 700;
+        }
+
+        .day-content {
+            padding: 24px 28px;
+            flex-grow: 1;
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .day-title {
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .day-tag {
+            background: rgba(0, 240, 255, 0.12);
+            color: var(--blue-accent);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.82em;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+        }
+
+        .day-body h4 {
+            color: var(--pink-accent);
+            font-size: 0.96em;
+            margin: 12px 0 4px;
+            font-weight: 700;
+        }
+
+        .day-body p {
+            color: var(--text-sub);
+            font-size: 0.94em;
+        }
+
+        /* ---------------- 避坑贴士 ---------------- */
+        .tips-card {
+            border-left: 4px solid var(--pink-accent);
+        }
+
+        .tip-item h5 {
+            color: var(--pink-accent);
+            font-size: 1.02em;
+            margin: 14px 0 4px;
+            font-weight: 700;
+        }
+
+        .tip-item p {
+            color: var(--text-sub);
+            font-size: 0.93em;
+        }
+
+        /* ---------------- 紧急联系电话 ---------------- */
+        .contacts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .contact-btn {
+            background: rgba(9, 10, 15, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .contact-btn:hover {
+            background: rgba(157, 78, 221, 0.2);
+            border-color: var(--blue-accent);
+            box-shadow: var(--glow-blue);
+        }
+
+        .contact-btn .copy-tag {
+            font-size: 0.82em;
+            background: rgba(0, 240, 255, 0.15);
+            padding: 4px 10px;
+            border-radius: 6px;
+            color: var(--blue-accent);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            font-weight: 700;
+        }
+
+        /* ---------------- Checklist 打包清单 ---------------- */
+        .checklist {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+        }
+
+        .checklist li {
+            background: rgba(9, 10, 15, 0.5);
+            border: 1px solid var(--card-border);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .checklist li:hover {
+            border-color: var(--pink-accent);
+            background: rgba(255, 85, 170, 0.08);
+        }
+
+        .checklist input[type="checkbox"] {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--purple-accent);
+            border-radius: 6px;
+            margin-right: 14px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .checklist input[type="checkbox"]:checked {
+            background-color: var(--pink-accent);
+            border-color: var(--pink-accent);
+            box-shadow: var(--glow-pink);
+        }
+
+        .checklist input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checklist li.completed span {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        /* ---------------- AA 预算计算器 ---------------- */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .calc-field label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-sub);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .calc-field input {
+            width: 100%;
+            background: rgba(9, 10, 15, 0.7);
+            border: 1px solid var(--card-border);
+            color: var(--blue-accent);
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            font-size: 1.05em;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .calc-field input:focus {
+            border-color: var(--blue-accent);
+            box-shadow: var(--glow-blue);
+            background: rgba(9, 10, 15, 0.9);
+        }
+
+        .calc-output-box {
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.2) 0%, rgba(0, 240, 255, 0.15) 100%);
+            border: 1px solid var(--card-border);
+            padding: 22px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .calc-output-box .highlight {
+            font-size: 1.8em;
+            font-weight: 800;
+            color: var(--pink-accent);
+            text-shadow: var(--glow-pink);
+            display: inline-block;
+            margin: 0 6px;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-top: 60px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .day-card { flex-direction: column; }
+            .day-badge { 
+                flex-direction: row; 
+                gap: 12px; 
+                padding: 14px; 
+                border-right: none; 
+                border-bottom: 1px solid var(--card-border); 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Canvas 全屏梦幻星空 -->
+    <canvas id="starfield"></canvas>
+
+    <!-- 动态星云发光光斑 -->
+    <div class="nebula nebula-pink"></div>
+    <div class="nebula nebula-blue"></div>
+    <div class="nebula nebula-purple"></div>
+
+    <!-- Header 顶部标题 -->
+    <header class="container">
+        <div class="hero-badge">✨ NORWAY ARCTIC CIRCLE 2027</div>
+        <h1 class="header-title">2027 挪威发呆计划</h1>
+        <p class="header-sub">罗弗敦群岛 · 特罗姆瑟 欧耶欧耶！！！ </p>
+    </header>
+
+    <div class="container">
+
+        <!-- 顶部 Dashboard 信息看板 -->
+        <div class="dashboard-bar">
+            <div class="dash-card">
+                <div class="dash-icon">⏳</div>
+                <div>
+                    <div class="lbl">距离出发倒计时</div>
+                    <div class="val" id="countdown-val">--- 天</div>
+                </div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-icon">📅</div>
+                <div>
+                    <div class="lbl">行程日期范围</div>
+                    <div class="val">2.20 - 2.27 (8天)</div>
+                </div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-icon">🇳🇴</div>
+                <div>
+                    <div class="lbl">特罗姆瑟当地时间</div>
+                    <div class="val" id="norway-time">00:00:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 行程时间线 Timeline -->
+        <h2 class="section-title">🗓️ 8 天极圈行程规划</h2>
+
+        <!-- Day 1 -->
+        <div class="day-card">
+            <div class="day-badge">
+                <span class="d-num">D1</span>
+                <span class="d-date">2.20</span>
+            </div>
+            <div class="day-content">
+                <div class="day-header">
+                    <div class="day-title">飞抵极圈大门 · 斯沃尔韦尔初体验</div>
+                    <div class="day-tag">✈️ 斯沃尔韦尔提车</div>
+                </div>
+                <div class="day-body">
+                    <h4>🕒 下午 18:15</h4>
+                    <p>飞抵斯沃尔韦尔机场（SVJ）。在机场提预订好的四驱 SUV（配钢钉轮胎）。</p>
+                    <h4>🕒 晚上 20:00</h4>
+                    <p>入住海边木屋，前往市中心 REMA 1000 超市采购食材。夜间注意观察极光预测 APP。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 2 -->
+        <div class="day-card">
+            <div class="day-badge">
+                <span class="d-num">D2</span>
+                <span class="d-date">2.21</span>
+            </div>
+            <div class="day-content">
+                <div class="day-header">
+                    <div class="day-title">深入罗弗敦核心 · 深入经典渔村</div>
+                    <div class="day-tag">🚗 E10 景观公路 ➔ 雷纳</div>
+                </div>
+                <div class="day-body">
+                    <h4>🕒 上午 09:30</h4>
+                    <p>沿着著名的 E10 景观公路向南行驶，途经 Hamnøy 桥 与 Å 镇（奥镇），欣赏峡湾与红木屋的反差。</p>
+                    <h4>🕒 晚上 19:30</h4>
+                    <p>入住雷纳（Reine）经典红木屋 Rorbu。若天空晴朗，可直接在木屋阳台上等待极光爆发。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 3 -->
+        <div class="day-card">
+            <div class="day-badge">
+                <span class="d-num">D3</span>
+                <span class="d-date">2.22</span>
+            </div>
+            <div class="day-content">
+                <div class="day-header">
+                    <div class="day-title">白雪与黑沙滩 · 冰海徒步与探秘</div>
+                    <div class="day-tag">🏔️ 白沙滩徒步</div>
+                </div>
+                <div class="day-body">
+                    <h4>🕒 上午 10:00</h4>
+                    <p>前往 Skagsanden 冰雪沙滩 或 Uttakleiv 龙珠海滩，穿戴简易冰爪在白雪包围的海岸线上徒步。</p>
+                    <h4>🕒 下午 14:00</h4>
+                    <p>打卡 Nusfjord 保护完好的百年古渔村，品尝当地特色热鱼汤与肉桂卷。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 4 -->
+        <div class="day-card">
+            <div class="day-badge">
+                <span class="d-num">D4</span>
+                <span class="d-date">2.23</span>
+            </div>
+            <div class="day-content">
+                <div class="day-header">
+                    <div class="day-title">享用海鲜盛宴</div>
+                    <div class="day-tag">🐟 亨尼斯韦尔 ➔ 斯沃尔韦尔</div>
+                </div>
+                <div class="day-body">
+                    <h4>🕒 上午 10:30</h4>
+                    <p>前往“罗弗敦的威尼斯”Henningsvær，参观著名的海岛足球场。</p>
+                    <h4>🕒 下午 16:00</h4>
+                    <p>到处闲逛 制作美味大餐 birthday time🍰</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 5 -->
+        <div class="day-card">
+            <div class="day-badge">
+                <span class="d-num">D5</span>
+                <span class="d-date">2.24</span>
+            </div>
+            <div class="day-content">
+                <div class="day-header">
+                    <div class="day-title">海路北上 · 海运邮轮探密峡湾</div>
+                    <div class="day-tag">🚢 海上邮轮之旅</div>
+                </div>
+                <div class="day-body">
+			<h4>🕒 上午 10:00</h4>
+                    <p>返回斯沃尔韦尔，加满油并清洗车辆后还车，准备乘坐夜间海路前往下一个目的地。</p>
+			<h4>🕒 晚上 22:00</h4>
+                    <p>乘坐挪威沿海邮轮（Hurtigruten / Havila）沿挪威海北上，欣赏甲板两侧拔地而起的雪山峡湾奇景。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 6-7 -->
+        <div class="day-card">
+            <div class="day-badge">
+                <span class="d-num">D6-7</span>
+                <span class="d-date">2.25-26</span>
+            </div>
+            <div class="day-content">
+                <div class="day-header">
+                    <div class="day-title">重回大城市文明 · 萨米驯鹿与极光终章</div>
+                    <div class="day-tag">🦌 特罗姆瑟活力两晚</div>
+                </div>
+                <div class="day-body">
+                    <h4>🕒 D6 下午 14:15</h4>
+                    <p>邮轮驶入“北极之门”特罗姆瑟。入住市中心酒店后，乘坐 Fjellheisen 缆车登顶 Storsteinen 山，俯瞰整个冰雪包围的特罗姆瑟半岛与万家灯火。</p>
+                    <h4>🕒 D7 全天</h4>
+                    <p>体验萨米人驯鹿拉雪橇，在传统帐篷（Lavvu）里听萨米民歌、喝鹿肉热汤。晚上参加极光追光团或在北极大教堂欣赏音乐会。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 8 -->
+        <div class="day-card">
+            <div class="day-badge">
+                <span class="d-num">D8</span>
+                <span class="d-date">2.27</span>
+            </div>
+            <div class="day-content">
+                <div class="day-header">
+                    <div class="day-title">极圈满载归途</div>
+                    <div class="day-tag">✈️ 特罗姆瑟 ➔ 返程</div>
+                </div>
+                <div class="day-body">
+                    <p>睡到自然醒，在市中心购买鱼子酱、深海鱼油等挪威特产，前往特罗姆瑟机场（TOS）搭乘航班经奥斯陆返程。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 避坑贴士 -->
+        <div class="glass-card tips-card">
+            <h2 class="section-title" style="color: var(--pink-accent);">⚠️ 极圈自驾生存法则</h2>
+            <div class="tip-item">
+                <h5>🚨 冰雪路面黑冰（Black Ice）</h5>
+                <p>白天融雪降温后会在路面形成透明冰层，看似干燥沥青实则极滑。过弯和经过桥梁时务必提前减速，切忌急刹车或猛打方向盘。</p>
+            </div>
+            <div class="tip-item">
+                <h5>⛽ 加油站与预授权</h5>
+                <p>罗弗敦南部加油站较少，建议油量低于 1/3 即在沿途城市加满。自助加油机扣除预授权属正常现象。</p>
+            </div>
+            <div class="tip-item">
+                <h5>💳 无现金社会准备</h5>
+                <p>挪威 100% 支持刷卡（Visa/MasterCard 芯片卡），完全无需兑换现金。</p>
+            </div>
+        </div>
+
+        <!-- 紧急/实用联系电话 -->
+        <div class="glass-card">
+            <h2 class="section-title">📞 挪威紧急救援与实用电话 (点击复制)</h2>
+            <div class="contacts-grid">
+                <button class="contact-btn" onclick="copyText('112')">
+                    <span>🚨 挪威报警电话</span>
+                    <span class="copy-tag">112</span>
+                </button>
+                <button class="contact-btn" onclick="copyText('113')">
+                    <span>🚑 挪威急救中心</span>
+                    <span class="copy-tag">113</span>
+                </button>
+                <button class="contact-btn" onclick="copyText('+47 22122400')">
+                    <span>🇨🇳 驻挪威大使馆领保</span>
+                    <span class="copy-tag">+47 22122400</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 打包 Checklist -->
+        <div class="glass-card">
+            <h2 class="section-title">🎒 行前打包 Checklist (自动保存)</h2>
+            <ul class="checklist" id="travel-checklist">
+                <li><input type="checkbox" id="item-1"><label for="item-1"><span>护照与挪威签证（及电子备份）</span></label></li>
+                <li><input type="checkbox" id="item-2"><label for="item-2"><span>芯片信用卡（Visa / MasterCard）</span></label></li>
+                <li><input type="checkbox" id="item-3"><label for="item-3"><span>驾照原件 + 驾照国际翻译认证件</span></label></li>
+                <li><input type="checkbox" id="item-4"><label for="item-4"><span>防风防水外套/冲锋衣 + 保暖羽绒服</span></label></li>
+                <li><input type="checkbox" id="item-5"><label for="item-5"><span>羊毛保暖内衣库 + 防水防滑雪地靴</span></label></li>
+                <li><input type="checkbox" id="item-6"><label for="item-6"><span>Microspikes 防滑简易冰爪（必备）</span></label></li>
+                <li><input type="checkbox" id="item-7"><label for="item-7"><span>暖宝宝/暖足贴 + 保温杯</span></label></li>
+                <li><input type="checkbox" id="item-8"><label for="item-8"><span>欧标转换插头 + 移动电源</span></label></li>
+            </ul>
+        </div>
+
+        <!-- AA 预算计算器（纯人民币 CNY 逻辑） -->
+        <div class="glass-card">
+            <h2 class="section-title">💰 平摊费用预算计算器 (人民币 CNY)</h2>
+            <div class="calc-grid">
+                <div class="calc-field">
+                    <label for="people">同行人数 (人)</label>
+                    <input type="number" id="people" value="3" min="1" oninput="calculateBudget()">
+                </div>
+                <div class="calc-field">
+                    <label for="flight">往返机票总计 (元)</label>
+                    <input type="number" id="flight" value="30000" min="0" oninput="calculateBudget()">
+                </div>
+                <div class="calc-field">
+                    <label for="car">租车/油费/过路费 (元)</label>
+                    <input type="number" id="car" value="10000" min="0" oninput="calculateBudget()">
+                </div>
+                <div class="calc-field">
+                    <label for="hotel">全程住宿总计 (元)</label>
+                    <input type="number" id="hotel" value="20000" min="0" oninput="calculateBudget()">
+                </div>
+                <div class="calc-field">
+                    <label for="ship">内陆渡轮/邮轮 (元)</label>
+                    <input type="number" id="ship" value="4000" min="0" oninput="calculateBudget()">
+                </div>
+            </div>
+            <div class="calc-output-box">
+                人均应平摊总费用：<span class="highlight" id="total-cny">0</span> 元 / 人
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>🌌 2027 挪威发呆计划必定圆满成功 耶吼</p>
+    </footer>
+
+    <!-- JavaScript 脚本 -->
+    <script>
+        // 1. Canvas 动态梦幻星空生成器
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+
+        let stars = [];
+        const numStars = 160;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.3,
+                    color: Math.random() > 0.4 ? '#ffffff' : (Math.random() > 0.5 ? '#FF55AA' : '#00F0FF'),
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.015 + 0.005
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = star.color;
+                ctx.globalAlpha = Math.abs(Math.sin(star.alpha));
+                ctx.fill();
+                star.alpha += star.speed;
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        drawStars();
+
+        // 2. 出发倒计时 & 挪威当地时间
+        function updateDashboard() {
+            const targetDate = new Date('2027-02-20T00:00:00');
+            const now = new Date();
+            const diffTime = targetDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('countdown-val').innerText = diffDays > 0 ? `${diffDays} 天` : '已出发！';
+
+            const options = { timeZone: 'Europe/Oslo', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const norwayTimeString = new Intl.DateTimeFormat('zh-CN', options).format(now);
+            document.getElementById('norway-time').innerText = norwayTimeString;
+        }
+
+        // 3. AA 预算计算器 (纯人民币 CNY 计算)
+        function calculateBudget() {
+            const people = parseFloat(document.getElementById('people').value) || 1;
+            const flight = parseFloat(document.getElementById('flight').value) || 0;
+            const car = parseFloat(document.getElementById('car').value) || 0;
+            const hotel = parseFloat(document.getElementById('hotel').value) || 0;
+            const ship = parseFloat(document.getElementById('ship').value) || 0;
+
+            const totalCNY = flight + car + hotel + ship;
+            const perPersonCNY = Math.round(totalCNY / people);
+
+            document.getElementById('total-cny').innerText = perPersonCNY.toLocaleString();
+        }
+
+        // 4. Checklist 本地保存 (LocalStorage)
+        const checklist = document.getElementById('travel-checklist');
+        const checkboxes = checklist.querySelectorAll('input[type="checkbox"]');
+
+        function loadChecklistState() {
+            checkboxes.forEach(box => {
+                const isChecked = localStorage.getItem(box.id) === 'true';
+                box.checked = isChecked;
+                toggleCompletedStyle(box);
+            });
+        }
+
+        function toggleCompletedStyle(box) {
+            const li = box.closest('li');
+            if (box.checked) {
+                li.classList.add('completed');
+            } else {
+                li.classList.remove('completed');
+            }
+        }
+
+        checkboxes.forEach(box => {
+            box.addEventListener('change', (e) => {
+                localStorage.setItem(e.target.id, e.target.checked);
+                toggleCompletedStyle(e.target);
+            });
+        });
+
+        // 5. 点击复制号码功能
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`已成功复制: ${text}`);
+            });
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDashboard();
+            setInterval(updateDashboard, 1000);
+            calculateBudget();
+            loadChecklistState();
+        });
+    </script>
+</body>
+</html>
