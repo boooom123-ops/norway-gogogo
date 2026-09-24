@@ -691,13 +691,14 @@
         .contact-btn .copy-tag { font-size: 0.8em; background: rgba(0, 240, 255, 0.15); padding: 3px 8px; border-radius: 6px; color: var(--blue-accent); border: 1px solid rgba(0, 240, 255, 0.3); font-weight: 700; }
 
         /* Checklist */
-        .checklist { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+        .checklist { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
         .checklist li {
             background: rgba(9, 10, 15, 0.5);
             border: 1px solid var(--card-border);
             padding: 12px 16px;
             border-radius: var(--radius-md);
             display: flex;
+            flex-wrap: wrap;          /* 「每人」的 chips 行 / 「已备」备注行要能换行到第二排 */
             align-items: center;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -737,8 +738,9 @@
         .sync-badge.offline { color: #FFC46B; border-color: rgba(255, 196, 107, 0.4); }
 
         .checklist li .chk-by {
-            font-size: 0.72em; color: var(--green-accent); font-weight: 700;
-            padding-left: 10px; white-space: nowrap; flex: 0 0 auto;
+            flex: 1 1 100%; margin-top: 9px; padding-top: 9px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.10);
+            font-size: 0.74em; color: var(--green-accent); font-weight: 700;
         }
         .checklist li .chk-del {
             flex: 0 0 auto;
@@ -751,6 +753,53 @@
         .checklist li .chk-del:hover { opacity: 1; color: var(--pink-accent); border-color: rgba(255, 85, 170, 0.5); background: rgba(255, 85, 170, 0.12); box-shadow: var(--glow-pink); }
         .checklist li.chk-empty { color: var(--text-muted); cursor: default; justify-content: center; font-size: 0.9em; }
         .checklist li.chk-empty:hover { border-color: var(--card-border); background: rgba(9, 10, 15, 0.5); }
+
+        /* Checklist：模式标签（共同 / 每人），点一下切换 */
+        .checklist li .chk-tag {
+            flex: 0 0 auto;
+            font-size: 0.68em; font-weight: 800; letter-spacing: 0.04em;
+            padding: 3px 9px; margin-right: 10px;
+            border-radius: 999px; cursor: pointer; line-height: 1.5;
+            background: rgba(157, 78, 221, 0.14);
+            border: 1px solid rgba(157, 78, 221, 0.45);
+            color: var(--purple-accent);
+            transition: all 0.2s ease;
+        }
+        .checklist li .chk-tag:hover { border-color: var(--purple-accent); box-shadow: 0 0 8px rgba(157, 78, 221, 0.35); }
+        .checklist li.personal .chk-tag {
+            background: rgba(0, 240, 255, 0.10);
+            border-color: rgba(0, 240, 255, 0.45);
+            color: var(--blue-accent);
+        }
+
+        /* Checklist：「每人各备」的按人状态 chips */
+        .checklist li .chk-text { flex: 1 1 120px; cursor: default; }
+        .checklist li .chk-people {
+            flex: 1 1 100%; display: flex; gap: 6px; flex-wrap: wrap;
+            margin-top: 9px; padding-top: 9px; border-top: 1px dashed rgba(255, 255, 255, 0.10);
+        }
+        .checklist li .ps-chip {
+            font-size: 0.74em; font-weight: 700; padding: 4px 11px;
+            border-radius: 999px; cursor: pointer; line-height: 1.5;
+            background: transparent;
+            border: 1px dashed rgba(255, 255, 255, 0.28);
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .checklist li .ps-chip:hover { border-color: var(--blue-accent); color: var(--text-main); }
+        .checklist li .ps-chip.st-1 {
+            border: 1px solid rgba(0, 255, 171, 0.55);
+            background: rgba(0, 255, 171, 0.13);
+            color: var(--green-accent); box-shadow: var(--glow-green);
+        }
+        .checklist li .ps-chip.st-2 {
+            border: 1px solid rgba(255, 196, 107, 0.5);
+            background: rgba(255, 196, 107, 0.10);
+            color: #FFC46B;
+        }
+        .checklist-legend { font-size: 0.76em; color: var(--text-muted); font-weight: 500; margin: -8px 0 14px; }
+        .checklist-legend b { color: var(--green-accent); }
+        .checklist-legend i { color: #FFC46B; font-style: normal; }
 
         /* 🔐 身份认领与锁定 */
         .identity-gate {
@@ -952,7 +1001,9 @@
             .chat-input-area input[type="text"],
             .expense-form input,
             .expense-form select,
-            .gate-input-row input { font-size: 16px; }
+            .gate-input-row input,
+            .checklist-add input[type="text"],
+            .checklist-add select { font-size: 16px; }
         }
 
         @media (max-width: 560px) {
@@ -1343,8 +1394,14 @@
             <div class="checklist-add">
                 <input type="text" id="checklist-new" maxlength="80" placeholder="还想带什么？写下来，全队都能看到…"
                        onkeydown="if(event.key==='Enter'){event.preventDefault();addChecklistItem();}">
+                <select id="checklist-new-mode" title="这件东西是全队共同带一份，还是每人各带一份？"
+                        style="flex: 0 0 auto; background: rgba(9, 10, 15, 0.7); border: 1px solid var(--card-border); color: var(--text-main); padding: 10px 8px; border-radius: var(--radius-sm); outline: none; font-size: 0.9em; cursor: pointer;">
+                    <option value="shared">共同一份</option>
+                    <option value="personal">每人各备</option>
+                </select>
                 <button class="btn-glow" onclick="addChecklistItem()">＋ 添加</button>
             </div>
+            <p class="checklist-legend">「每人各备」的物品会给每个人一个状态：点名字切换&nbsp; 未准备 → <b>✓ 已准备</b>&nbsp;→&nbsp;<i>不需要</i>，全员完成才算备齐。</p>
             <ul class="checklist" id="travel-checklist"></ul>
             <div class="checklist-foot" id="checklist-progress"></div>
         </div>
@@ -2227,9 +2284,11 @@
         }
 
         // ============================================================
-        // 5. 行前打包 Checklist —— 云端共享，人人可增可删
+        // 5. 行前打包 Checklist —— 云端共享，人人可增可删，分「共同一份」和「每人各备」两种模式
         // ------------------------------------------------------------
         // 条目存在 Supabase 的 checklist 表里，三个人看到的是同一份。
+        // 「共同」= 全队带一份，一个总勾；「每人」= 每人各备一份，按人记录：
+        //   未准备(灰) / ✓已准备(绿) / 不需要(琥珀) —— 点名字循环切换。
         // 如果表还没建 / 断网 / 没权限，会自动降级成"本机清单"：
         // 增删打勾照样能用，只是不同步，右上角会显示「📴 本机模式」。
         // ============================================================
@@ -2268,13 +2327,28 @@
                     return { id: i + 1, text: t, checked: wasChecked, checked_by: null };
                 });
             }
-            localChecklist = arr;
-            return arr;
+            localChecklist = arr.map(normChk);   // 旧缓存没有 item_mode / person_status 的，补上默认值
+            return localChecklist;
         }
 
         function writeLocalChecklist(next) {
             localChecklist = next;
             try { localStorage.setItem(LOCAL_CHECKLIST_KEY, JSON.stringify(next)); } catch (e) {}
+        }
+
+        // 云端报「找不到某列」= 数据库表结构落后于页面（缺 item_mode / person_status）。
+        // 这种情况 Supabase 的报错很晦涩，直接给一句能照做的话。
+        function chkSchemaHint(err) {
+            const msg = (err && err.message) || '';
+            const missingCol = err && (err.code === 'PGRST204'
+                || err.code === '42703'
+                || /could not find the '.*' column|column .* does not exist/i.test(msg));
+            if (missingCol) {
+                return '数据库的 checklist 表还缺 item_mode / person_status 两列。\n\n'
+                     + '请在 Supabase → SQL Editor 里把 supabase_checklist_setup.sql 的第 1 节重跑一次'
+                     + '（里面有 alter table ... add column if not exists，只会补列，不会清数据）。';
+            }
+            return msg;
         }
 
         function setChecklistSyncBadge(cloud) {
@@ -2302,26 +2376,97 @@
             return null;
         }
 
+        // 统一条目形状：老数据（本地旧缓存 / 云端旧表）没有这两列，补默认值
+        function normChk(it) {
+            return {
+                id: it.id,
+                text: it.text,
+                checked: !!it.checked,
+                checked_by: it.checked_by || null,
+                created_by: it.created_by || null,
+                item_mode: it.item_mode === 'personal' ? 'personal' : 'shared',
+                person_status: (it.person_status && typeof it.person_status === 'object' && !Array.isArray(it.person_status)) ? it.person_status : {}
+            };
+        }
+
+        // 某人在某条「每人」物品上的状态：0 未准备 / 1 已准备 / 2 不需要
+        function psGet(it, name) {
+            const v = (it.person_status || {})[name];
+            return (v === 1 || v === 2) ? v : 0;
+        }
+        function personalAllDone(it) {
+            return roster.names.every(n => psGet(it, n) !== 0);
+        }
+
+        let checklistItems = [];   // 最近一次渲染的清单，供切换状态时做乐观更新
+
         function renderChecklist(items) {
             const ul = document.getElementById('travel-checklist');
             if (!ul) return;
+            checklistItems = items.map(normChk);
 
             if (!items.length) {
                 ul.innerHTML = '<li class="chk-empty">清单是空的，在上面输入框里加第一条吧。</li>';
             } else {
-                ul.innerHTML = items.map(it => `
-                    <li class="${it.checked ? 'completed' : ''}" data-id="${escapeHtml(it.id)}">
-                        <input type="checkbox" id="chk-${escapeHtml(it.id)}" ${it.checked ? 'checked' : ''}>
-                        <label for="chk-${escapeHtml(it.id)}"><span>${escapeHtml(it.text)}</span></label>
-                        ${it.checked && it.checked_by ? `<span class="chk-by">${escapeHtml(it.checked_by)} 已备</span>` : ''}
-                        <button class="chk-del" title="从清单里删掉这一条" aria-label="删除">✕</button>
-                    </li>
-                `).join('');
+                ul.innerHTML = items.map(renderChkItem).join('');
             }
 
-            const done = items.filter(i => i.checked).length;
+            updateChecklistProgress();
+        }
+
+        function renderChkItem(it) {
+            if (it.item_mode === 'personal') {
+                const chips = roster.names.map(n => {
+                    const st = psGet(it, n);
+                    const glyph = st === 1 ? '✓ ' : (st === 2 ? '' : '');
+                    const word = st === 2 ? ' 免' : '';
+                    const tip = {
+                        0: '未准备 —— 点一下标记为 ✓ 已准备',
+                        1: '已准备 —— 点一下改为「不需要」',
+                        2: '不需要准备 —— 点一下重置为未准备'
+                    }[st];
+                    return `<button type="button" class="ps-chip st-${st}" data-person="${escapeHtml(n)}" title="${escapeHtml(n)}：${tip}">${glyph}${escapeHtml(n)}${word}</button>`;
+                }).join('');
+                return `<li class="personal${personalAllDone(it) ? ' completed' : ''}" data-id="${escapeHtml(it.id)}">
+                    <button type="button" class="chk-tag" title="改成「共同一份」：只记一个总勾，全队谁备都算">每人</button>
+                    <span class="chk-text"><span>${escapeHtml(it.text)}</span></span>
+                    <button class="chk-del" title="从清单里删掉这一条" aria-label="删除">✕</button>
+                    <div class="chk-people">${chips}</div>
+                </li>`;
+            }
+            return `<li class="${it.checked ? 'completed' : ''}" data-id="${escapeHtml(it.id)}">
+                <input type="checkbox" id="chk-${escapeHtml(it.id)}" ${it.checked ? 'checked' : ''}>
+                <button type="button" class="chk-tag" title="改成「每人各备一份」：分别记录每个人的准备状态">共同</button>
+                <label for="chk-${escapeHtml(it.id)}"><span>${escapeHtml(it.text)}</span></label>
+                <button class="chk-del" title="从清单里删掉这一条" aria-label="删除">✕</button>
+                ${it.checked && it.checked_by ? `<span class="chk-by">✓ ${escapeHtml(it.checked_by)} 已备</span>` : ''}
+            </li>`;
+        }
+
+        function updateChecklistProgress() {
             const prog = document.getElementById('checklist-progress');
-            if (prog) prog.textContent = items.length ? `已备齐 ${done} / ${items.length}` : '';
+            if (!prog) return;
+            const items = checklistItems;
+            if (!items.length) { prog.textContent = ''; return; }
+
+            const isDone = it => it.item_mode === 'personal' ? personalAllDone(it) : !!it.checked;
+            const done = items.filter(isDone).length;
+
+            // 「每人」类物品再按人统计一眼：hhl 2/3 · zmy 3/3 · zyx 1/3（「不需要」不计入分母）
+            const personals = items.filter(i => i.item_mode === 'personal');
+            let perLine = '';
+            if (personals.length) {
+                perLine = roster.names.map(n => {
+                    let need = 0, ok = 0;
+                    personals.forEach(it => {
+                        const st = psGet(it, n);
+                        if (st !== 2) { need++; if (st === 1) ok++; }
+                    });
+                    return need === 0 ? `${escapeHtml(n)} 免` : `${escapeHtml(n)} ${ok}/${need}`;
+                }).join(' · ');
+                perLine = `<br>${perLine}<span style="opacity:0.65">（按人统计，仅「每人」类；「免」= 不需要，不计数）</span>`;
+            }
+            prog.innerHTML = `已备齐 ${done} / ${items.length}` + perLine;
         }
 
         async function fetchChecklist() {
@@ -2353,18 +2498,21 @@
             const me = getIdentity();
             if (!me) { alert('请先认领你的身份。'); showIdentityGate(); return; }
 
+            const modeSel = document.getElementById('checklist-new-mode');
+            const mode = (modeSel && modeSel.value === 'personal') ? 'personal' : 'shared';
+
             if (sb && checklistCloud) {
-                const { error } = await sb.from(CHECKLIST_TABLE).insert([{ text: text, created_by: me }]);
+                const { error } = await sb.from(CHECKLIST_TABLE).insert([{ text: text, created_by: me, item_mode: mode }]);
                 if (error) {
                     console.error('添加清单条目失败:', error.message);
-                    alert('添加失败：' + error.message);
+                    alert('添加失败：' + chkSchemaHint(error));
                     return;   // 失败时保留输入框内容，别把队友打的字弄丢
                 }
                 input.value = '';
                 await fetchChecklist();
             } else {
                 const arr = readLocalChecklist().slice();
-                arr.push({ id: 'L' + Date.now(), text: text, checked: false, checked_by: null });
+                arr.push({ id: 'L' + Date.now(), text: text, checked: false, checked_by: null, item_mode: mode, person_status: {} });
                 writeLocalChecklist(arr);
                 input.value = '';
                 renderChecklist(arr);
@@ -2417,12 +2565,102 @@
             }
         }
 
-        // 删除按钮 / 打勾：用事件委托，避免往 innerHTML 里塞 onclick
+        // 「每人」物品：点某个人的名字，状态循环 未准备(0) → ✓已准备(1) → 不需要(2) → 未准备(0)
+        async function cyclePersonStatus(id, person) {
+            const it = checklistItems.find(x => String(x.id) === String(id));
+            if (!it || it.item_mode !== 'personal') return;
+            if (roster.names.indexOf(person) === -1) return;   // 名单里没有的人（改名后遗留），忽略
+
+            const ps = Object.assign({}, it.person_status);
+            const cur = psGet(it, person);
+            ps[person] = cur === 0 ? 1 : (cur === 1 ? 2 : 0);
+
+            const allDone = roster.names.every(n => { const v = ps[n]; return v === 1 || v === 2; });
+
+            // 先把界面更新到位，不等网络
+            it.person_status = ps;
+            it.checked = allDone;
+            renderChecklist(checklistItems);
+
+            if (sb && checklistCloud) {
+                const { error } = await sb.from(CHECKLIST_TABLE)
+                    .update({ person_status: ps, checked: allDone })
+                    .eq('id', it.id);
+                if (error) {
+                    console.error('保存准备状态失败:', error.message);
+                    alert('保存失败：' + chkSchemaHint(error));
+                    await fetchChecklist();   // 回滚成服务端的真实状态
+                }
+                // 成功就不重复拉取：本地渲染的已经是最新，Realtime 会推给队友
+            } else {
+                const arr = readLocalChecklist();
+                const row = arr.find(x => String(x.id) === String(id));
+                if (row) { row.person_status = ps; row.checked = allDone; }
+                writeLocalChecklist(arr);
+            }
+        }
+
+        // 「共同 ⇄ 每人」模式切换
+        async function toggleChecklistMode(id) {
+            const it = checklistItems.find(x => String(x.id) === String(id));
+            if (!it) return;
+            const to = it.item_mode === 'shared' ? 'personal' : 'shared';
+
+            if (to === 'personal') {
+                if (!confirm(`把「${it.text}」改成「每人各备一份」？\n\n之后会分别记录每个人的准备状态。`)) return;
+            } else {
+                if (!confirm(`把「${it.text}」改回「共同一份」？\n\n每个人的状态将合并成一个总勾（当前全员完成才保持已勾选）。`)) return;
+            }
+
+            let patch;
+            if (to === 'personal') {
+                // 原来已勾 → 视为全员都已准备；没勾 → 全员未准备
+                const ps = {};
+                roster.names.forEach(n => { ps[n] = it.checked ? 1 : 0; });
+                patch = { item_mode: 'personal', person_status: ps, checked_by: null };
+            } else {
+                const allDone = roster.names.every(n => { const v = (it.person_status || {})[n]; return v === 1 || v === 2; });
+                patch = { item_mode: 'shared', checked: allDone, person_status: {} };
+            }
+
+            Object.assign(it, patch);
+            renderChecklist(checklistItems);
+
+            if (sb && checklistCloud) {
+                const { error } = await sb.from(CHECKLIST_TABLE).update(patch).eq('id', it.id);
+                if (error) {
+                    console.error('保存清单模式失败:', error.message);
+                    alert('保存失败：' + chkSchemaHint(error));
+                    await fetchChecklist();
+                }
+            } else {
+                const arr = readLocalChecklist();
+                const row = arr.find(x => String(x.id) === String(id));
+                if (row) Object.assign(row, patch);
+                writeLocalChecklist(arr);
+            }
+        }
+
+        // 删除按钮 / 打勾 / 按人状态 / 模式切换：用事件委托，避免往 innerHTML 里塞 onclick
         (function bindChecklistEvents() {
             const ul = document.getElementById('travel-checklist');
             if (!ul) return;
 
             ul.addEventListener('click', (e) => {
+                const chip = e.target.closest('.ps-chip');
+                if (chip && chip.dataset.person) {
+                    e.preventDefault();
+                    const li = chip.closest('li');
+                    if (li && li.dataset.id) cyclePersonStatus(li.dataset.id, chip.dataset.person);
+                    return;
+                }
+                const tag = e.target.closest('.chk-tag');
+                if (tag) {
+                    e.preventDefault();
+                    const li = tag.closest('li');
+                    if (li && li.dataset.id) toggleChecklistMode(li.dataset.id);
+                    return;
+                }
                 const btn = e.target.closest('.chk-del');
                 if (!btn) return;
                 e.preventDefault();
