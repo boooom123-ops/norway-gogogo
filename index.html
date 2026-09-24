@@ -564,6 +564,47 @@
         .checklist input[type="checkbox"]:checked { background-color: var(--pink-accent); border-color: var(--pink-accent); box-shadow: var(--glow-pink); }
         .checklist input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-weight: bold; font-size: 13px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .checklist li.completed span { text-decoration: line-through; color: var(--text-muted); }
+        .checklist li label { flex: 1; cursor: pointer; }
+
+        /* Checklist 云端增删 */
+        .checklist-add { display: flex; gap: 10px; margin-bottom: 16px; }
+        .checklist-add input[type="text"] {
+            flex-grow: 1;
+            background: rgba(9, 10, 15, 0.7);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            font-size: 0.9em;
+        }
+        .checklist-add input[type="text"]:focus { border-color: var(--blue-accent); box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
+        .checklist-add button { padding: 10px 18px; border-radius: var(--radius-sm); font-size: 0.88em; font-weight: 700; cursor: pointer; }
+        .checklist-foot { margin-top: 14px; font-size: 0.85em; color: var(--text-muted); font-weight: 600; min-height: 1em; }
+        .sync-badge {
+            font-size: 0.72em; font-weight: 700; padding: 4px 11px; border-radius: 999px;
+            border: 1px solid var(--card-border); color: var(--text-sub);
+            background: var(--grad-badge-pink); white-space: nowrap; letter-spacing: 0.02em;
+            cursor: default;
+        }
+        .sync-badge.ok { color: var(--green-accent); border-color: rgba(0, 255, 171, 0.35); box-shadow: var(--glow-green); }
+        .sync-badge.offline { color: #FFC46B; border-color: rgba(255, 196, 107, 0.4); }
+
+        .checklist li .chk-by {
+            font-size: 0.72em; color: var(--green-accent); font-weight: 700;
+            padding-left: 10px; white-space: nowrap; flex: 0 0 auto;
+        }
+        .checklist li .chk-del {
+            flex: 0 0 auto;
+            margin-left: 8px;
+            width: 26px; height: 26px; padding: 0;
+            background: transparent; border: 1px solid transparent; color: var(--text-muted);
+            border-radius: 50%; cursor: pointer; line-height: 1;
+            font-size: 0.85em; opacity: 0.45; transition: all 0.2s ease;
+        }
+        .checklist li .chk-del:hover { opacity: 1; color: var(--pink-accent); border-color: rgba(255, 85, 170, 0.5); background: rgba(255, 85, 170, 0.12); box-shadow: var(--glow-pink); }
+        .checklist li.chk-empty { color: var(--text-muted); cursor: default; justify-content: center; font-size: 0.9em; }
+        .checklist li.chk-empty:hover { border-color: var(--card-border); background: rgba(9, 10, 15, 0.5); }
 
         /* 🔐 身份认领与锁定 */
         .identity-gate {
@@ -940,18 +981,16 @@
         <!-- 云端 Checklist 打包清单 -->
         <div class="glass-card" id="section-checklist">
             <h2 class="section-title">
-                <span class="title-left">🎒 行前打包 Checklist (云端&本地双同步)</span>
+                <span class="title-left">🎒 行前打包 Checklist</span>
+                <span class="sync-badge" id="checklist-sync-badge">载入中…</span>
             </h2>
-            <ul class="checklist" id="travel-checklist">
-                <li><input type="checkbox" id="item-1"><label for="item-1"><span>护照与挪威签证（及电子备份）</span></label></li>
-                <li><input type="checkbox" id="item-2"><label for="item-2"><span>芯片信用卡（Visa / MasterCard）</span></label></li>
-                <li><input type="checkbox" id="item-3"><label for="item-3"><span>驾照原件 + 驾照国际翻译认证件</span></label></li>
-                <li><input type="checkbox" id="item-4"><label for="item-4"><span>防风防水外套/冲锋衣 + 保暖羽绒服</span></label></li>
-                <li><input type="checkbox" id="item-5"><label for="item-5"><span>羊毛保暖内衣库 + 防水防滑雪地靴</span></label></li>
-                <li><input type="checkbox" id="item-6"><label for="item-6"><span>Microspikes 防滑简易冰爪（必备）</span></label></li>
-                <li><input type="checkbox" id="item-7"><label for="item-7"><span>暖宝宝/暖足贴 + 保温杯</span></label></li>
-                <li><input type="checkbox" id="item-8"><label for="item-8"><span>欧标转换插头 + 移动电源</span></label></li>
-            </ul>
+            <div class="checklist-add">
+                <input type="text" id="checklist-new" maxlength="80" placeholder="还想带什么？写下来，全队都能看到…"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();addChecklistItem();}">
+                <button class="btn-glow" onclick="addChecklistItem()">＋ 添加</button>
+            </div>
+            <ul class="checklist" id="travel-checklist"></ul>
+            <div class="checklist-foot" id="checklist-progress"></div>
         </div>
 
         <!-- 避坑贴士 -->
@@ -1353,33 +1392,227 @@
             document.getElementById('exp-title').value = '';
         }
 
-        // 5. Checklist 本地保存
-        const checklist = document.getElementById('travel-checklist');
-        const checkboxes = checklist.querySelectorAll('input[type="checkbox"]');
+        // ============================================================
+        // 5. 行前打包 Checklist —— 云端共享，人人可增可删
+        // ------------------------------------------------------------
+        // 条目存在 Supabase 的 checklist 表里，三个人看到的是同一份。
+        // 如果表还没建 / 断网 / 没权限，会自动降级成"本机清单"：
+        // 增删打勾照样能用，只是不同步，右上角会显示「📴 本机模式」。
+        // ============================================================
+        const CHECKLIST_TABLE = 'checklist';
+        const LOCAL_CHECKLIST_KEY = 'norway_checklist_v2';
 
-        function loadChecklistState() {
-            checkboxes.forEach(box => {
-                const isChecked = localStorage.getItem(box.id) === 'true';
-                box.checked = isChecked;
-                toggleCompletedStyle(box);
-            });
+        // 这 8 条是原来写死在 HTML 里的初始清单。只在云端还没建好、
+        // 退化成本机模式时用来打底；云端建好表之后由 SQL 脚本里的初始数据负责。
+        const DEFAULT_CHECKLIST = [
+            '护照与挪威签证（及电子备份）',
+            '芯片信用卡（Visa / MasterCard）',
+            '驾照原件 + 驾照国际翻译认证件',
+            '防风防水外套/冲锋衣 + 保暖羽绒服',
+            '羊毛保暖内衣库 + 防水防滑雪地靴',
+            'Microspikes 防滑简易冰爪（必备）',
+            '暖宝宝/暖足贴 + 保温杯',
+            '欧标转换插头 + 移动电源'
+        ];
+
+        let checklistCloud = !!sb;   // 云端可用吗？读一次失败就自动降级
+        let localChecklist = null;   // 本机模式下的清单（存 localStorage）
+
+        function readLocalChecklist() {
+            if (localChecklist) return localChecklist;
+            let arr = null;
+            try {
+                const raw = localStorage.getItem(LOCAL_CHECKLIST_KEY);
+                if (raw) arr = JSON.parse(raw);
+            } catch (e) { /* 存储被禁用就只放在内存里 */ }
+
+            if (!Array.isArray(arr)) {
+                // 首次运行：用这 8 条打底，并沿用改造前存在 item-1 ~ item-8 里的打勾状态
+                arr = DEFAULT_CHECKLIST.map((t, i) => {
+                    let wasChecked = false;
+                    try { wasChecked = localStorage.getItem('item-' + (i + 1)) === 'true'; } catch (e) {}
+                    return { id: i + 1, text: t, checked: wasChecked, checked_by: null };
+                });
+            }
+            localChecklist = arr;
+            return arr;
         }
 
-        function toggleCompletedStyle(box) {
-            const li = box.closest('li');
-            if (box.checked) {
-                li.classList.add('completed');
+        function writeLocalChecklist(next) {
+            localChecklist = next;
+            try { localStorage.setItem(LOCAL_CHECKLIST_KEY, JSON.stringify(next)); } catch (e) {}
+        }
+
+        function setChecklistSyncBadge(cloud) {
+            const el = document.getElementById('checklist-sync-badge');
+            if (!el) return;
+            if (cloud) {
+                el.textContent = '☁️ 云端同步 · 全队共享';
+                el.title = '清单存在 Supabase，三个人看到的是同一份。';
+                el.className = 'sync-badge ok';
             } else {
-                li.classList.remove('completed');
+                el.textContent = '📴 本机模式 · 未连接云端';
+                el.title = '云端表还没建好或网络不通，改动只保存在这台设备上。'
+                         + '把同目录的 supabase_checklist_setup.sql 在 Supabase SQL Editor 里跑一次即可开启同步。';
+                el.className = 'sync-badge offline';
             }
         }
 
-        checkboxes.forEach(box => {
-            box.addEventListener('change', (e) => {
-                localStorage.setItem(e.target.id, e.target.checked);
-                toggleCompletedStyle(e.target);
+        function findChecklistLi(id) {
+            const ul = document.getElementById('travel-checklist');
+            if (!ul) return null;
+            const want = String(id).replace(/[^0-9A-Za-z_-]/g, '');   // id 是我们自己生成的，只可能是数字或 L+时间戳
+            for (const li of ul.children) {
+                if (li.dataset && li.dataset.id === want) return li;
+            }
+            return null;
+        }
+
+        function renderChecklist(items) {
+            const ul = document.getElementById('travel-checklist');
+            if (!ul) return;
+
+            if (!items.length) {
+                ul.innerHTML = '<li class="chk-empty">清单是空的，在上面输入框里加第一条吧。</li>';
+            } else {
+                ul.innerHTML = items.map(it => `
+                    <li class="${it.checked ? 'completed' : ''}" data-id="${escapeHtml(it.id)}">
+                        <input type="checkbox" id="chk-${escapeHtml(it.id)}" ${it.checked ? 'checked' : ''}>
+                        <label for="chk-${escapeHtml(it.id)}"><span>${escapeHtml(it.text)}</span></label>
+                        ${it.checked && it.checked_by ? `<span class="chk-by">${escapeHtml(it.checked_by)} 已备</span>` : ''}
+                        <button class="chk-del" title="从清单里删掉这一条" aria-label="删除">✕</button>
+                    </li>
+                `).join('');
+            }
+
+            const done = items.filter(i => i.checked).length;
+            const prog = document.getElementById('checklist-progress');
+            if (prog) prog.textContent = items.length ? `已备齐 ${done} / ${items.length}` : '';
+        }
+
+        async function fetchChecklist() {
+            if (!sb || !checklistCloud) {
+                setChecklistSyncBadge(false);
+                renderChecklist(readLocalChecklist());
+                return;
+            }
+
+            const { data, error } = await sb.from(CHECKLIST_TABLE).select('*').order('id', { ascending: true });
+            if (error) {
+                // 表还没建好 / 没权限 / 断网 —— 降级成本机模式，别让这一块看着像坏了
+                console.warn('读取云端打包清单失败，已切到本机模式:', error.message);
+                checklistCloud = false;
+                setChecklistSyncBadge(false);
+                renderChecklist(readLocalChecklist());
+                return;
+            }
+            setChecklistSyncBadge(true);
+            renderChecklist(data || []);
+        }
+
+        async function addChecklistItem() {
+            const input = document.getElementById('checklist-new');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) { input.focus(); return; }
+
+            const me = getIdentity();
+            if (!me) { alert('请先认领你的身份。'); showIdentityGate(); return; }
+
+            if (sb && checklistCloud) {
+                const { error } = await sb.from(CHECKLIST_TABLE).insert([{ text: text, created_by: me }]);
+                if (error) {
+                    console.error('添加清单条目失败:', error.message);
+                    alert('添加失败：' + error.message);
+                    return;   // 失败时保留输入框内容，别把队友打的字弄丢
+                }
+                input.value = '';
+                await fetchChecklist();
+            } else {
+                const arr = readLocalChecklist().slice();
+                arr.push({ id: 'L' + Date.now(), text: text, checked: false, checked_by: null });
+                writeLocalChecklist(arr);
+                input.value = '';
+                renderChecklist(arr);
+            }
+        }
+
+        async function deleteChecklistItem(id) {
+            const li = findChecklistLi(id);
+            const labelEl = li ? li.querySelector('label span') : null;
+            const text = labelEl ? labelEl.textContent : '这一条';
+            if (!confirm(`确定把「${text}」从打包清单里删掉吗？\n删了之后全队都看不到了。`)) return;
+
+            if (sb && checklistCloud) {
+                const { error } = await sb.from(CHECKLIST_TABLE).delete().eq('id', id);
+                if (error) {
+                    console.error('删除清单条目失败:', error.message);
+                    alert('删除失败：' + error.message);
+                    return;
+                }
+                await fetchChecklist();
+            } else {
+                writeLocalChecklist(readLocalChecklist().filter(x => String(x.id) !== String(id)));
+                renderChecklist(readLocalChecklist());
+            }
+        }
+
+        async function toggleChecklistItem(id, checked) {
+            // 先在界面上立刻反映，不让勾选有延迟感
+            const li = findChecklistLi(id);
+            if (li) li.classList.toggle('completed', checked);
+
+            const me = getIdentity();
+            if (sb && checklistCloud) {
+                const { error } = await sb.from(CHECKLIST_TABLE)
+                    .update({ checked: checked, checked_by: checked ? me : null })
+                    .eq('id', id);
+                if (error) {
+                    console.error('保存打勾状态失败:', error.message);
+                    alert('保存失败：' + error.message);
+                    await fetchChecklist();   // 回滚成服务端的真实状态
+                    return;
+                }
+                await fetchChecklist();
+            } else {
+                const arr = readLocalChecklist().slice();
+                const it = arr.find(x => String(x.id) === String(id));
+                if (it) { it.checked = checked; it.checked_by = checked ? me : null; }
+                writeLocalChecklist(arr);
+                renderChecklist(arr);
+            }
+        }
+
+        // 删除按钮 / 打勾：用事件委托，避免往 innerHTML 里塞 onclick
+        (function bindChecklistEvents() {
+            const ul = document.getElementById('travel-checklist');
+            if (!ul) return;
+
+            ul.addEventListener('click', (e) => {
+                const btn = e.target.closest('.chk-del');
+                if (!btn) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const li = btn.closest('li');
+                if (li && li.dataset.id) deleteChecklistItem(li.dataset.id);
             });
-        });
+
+            ul.addEventListener('change', (e) => {
+                if (!e.target || e.target.type !== 'checkbox') return;
+                const li = e.target.closest('li');
+                if (li && li.dataset.id) toggleChecklistItem(li.dataset.id, e.target.checked);
+            });
+        })();
+
+        function subscribeChecklistRealtime() {
+            if (!sb || !checklistCloud) return;
+            // 表没加进 supabase_realtime 发布就不生效，此时靠下面的轮询兜底
+            sb.channel('public:checklist')
+                .on('postgres_changes', { event: '*', schema: 'public', table: CHECKLIST_TABLE }, () => {
+                    fetchChecklist();
+                })
+                .subscribe();
+        }
 
         // 6. 复制文字
         function copyText(text) {
@@ -1402,7 +1635,15 @@
             setInterval(() => { if (!document.hidden) fetchMessages(); }, 15000);
 
             fetchExpenses();
-            loadChecklistState();
+
+            fetchChecklist();
+            subscribeChecklistRealtime();
+            // 兜底轮询：万一没给 checklist 表开 Realtime，队友增删的条目也会自动出现
+            setInterval(() => { if (!document.hidden) fetchChecklist(); }, 20000);
+            // 从别的标签页切回来时立刻对一次账
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) fetchChecklist();
+            });
         });
     </script>
 </body>
