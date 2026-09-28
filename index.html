@@ -1428,7 +1428,10 @@
 
         <!-- 行程时间线 Timeline -->
         <div id="section-itinerary">
-            <h2 class="section-title" style="margin-bottom: 20px;">🗓️ 8 天极圈行程规划</h2>
+            <h2 class="section-title" style="margin-bottom: 20px;">
+                <span class="title-left">🗓️ 8 天极圈行程规划</span>
+                <span class="sync-badge" id="itin-sync-badge">载入中…</span>
+            </h2>
 
             <!-- Day 1 -->
             <div class="day-card">
@@ -1462,7 +1465,7 @@
                         <div class="day-tag">🚗 E10 景观公路 ➔ 雷纳</div>
                     </div>
                     <div class="day-body">
-                        <h4>🕒 上午 09:30</h4>
+                        <h4>🕒 上午 11:30</h4>
                         <p>沿着著名的 E10 景观公路向南行驶，途经 Hamnøy 桥 与 Å 镇（奥镇），欣赏峡湾与红木屋的反差。</p>
                         <h4>🕒 晚上 19:30</h4>
                         <p>入住雷纳（Reine）经典红木屋 Rorbu。若天空晴朗，可直接在木屋阳台上等待极光爆发。</p>
@@ -1530,22 +1533,38 @@
                 </div>
             </div>
 
-            <!-- Day 6-7 -->
+            <!-- Day 6 -->
             <div class="day-card">
                 <div class="day-badge">
-                    <span class="d-num">D6-7</span>
-                    <span class="d-date">2.25-26</span>
+                    <span class="d-num">D6</span>
+                    <span class="d-date">2.25</span>
                 </div>
                 <div class="day-content">
                     <div class="day-header">
-                        <div class="day-title">重回大城市文明 · 萨米驯鹿与极光终章</div>
-                        <div class="day-tag">🦌 特罗姆瑟活力两晚</div>
+                        <div class="day-title">邮轮抵达“北极之门” · 缆车俯瞰极圈之城</div>
+                        <div class="day-tag">🚢 邮轮抵达特罗姆瑟</div>
                     </div>
                     <div class="day-body">
-                        <h4>🕒 D6 下午 14:15</h4>
+                        <h4>🕒 下午 14:15</h4>
                         <p>邮轮驶入“北极之门”特罗姆瑟。入住市中心酒店后，乘坐 Fjellheisen 缆车登顶 Storsteinen 山，俯瞰整个冰雪包围的特罗姆瑟半岛与万家灯火。</p>
-                        <h4>🕒 D7 全天</h4>
-                        <p>体验萨米人驯鹿拉雪橇，在传统帐篷（Lavvu）里听萨米民歌、喝鹿肉热汤。晚上参加极光追光团或在北极大教堂欣赏音乐会。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 7 -->
+            <div class="day-card">
+                <div class="day-badge">
+                    <span class="d-num">D7</span>
+                    <span class="d-date">2.26</span>
+                </div>
+                <div class="day-content">
+                    <div class="day-header">
+                        <div class="day-title">极光终章</div>
+                        <div class="day-tag">🦌 特罗姆瑟 · 活力一日</div>
+                    </div>
+                    <div class="day-body">
+                        <h4>🕒 TBD</h4>
+                        <p>TBD...TBD...TBD...</p>
                     </div>
                 </div>
             </div>
@@ -1562,7 +1581,7 @@
                         <div class="day-tag">✈️ 特罗姆瑟 ➔ 返程</div>
                     </div>
                     <div class="day-body">
-                        <p>睡到自然醒，在市中心购买鱼子酱、深海鱼油等挪威特产，前往特罗姆瑟机场（TOS）搭乘航班经奥斯陆返程。</p>
+                        <p>睡到自然醒，前往特罗姆瑟机场（TOS）搭乘航班经奥斯陆返程。</p>
                     </div>
                 </div>
             </div>
@@ -1877,6 +1896,7 @@
                 ['账单',              'expenses',  'payer',      { payer: newName }],
                 ['打包清单·添加人',    CHECKLIST_TABLE, 'created_by', { created_by: newName }],
                 ['打包清单·打勾人',    CHECKLIST_TABLE, 'checked_by', { checked_by: newName }],
+                ['每日行程·添加人',    ITIN_TABLE,      'created_by', { created_by: newName }],
                 ['云端队伍名单',       MEMBERS_TABLE,   'name',       { name: newName }]
             ];
 
@@ -2979,6 +2999,15 @@
                 if (!document.hidden) fetchChecklist();
             });
 
+            // 🗓️ 每日自定义行程：云端读取 + 旧本地数据搬家 + 实时/轮询同步
+            fetchItinerary();
+            migrateLocalItin();
+            subscribeItinRealtime();
+            setInterval(() => { if (!document.hidden) fetchItinerary(); }, 20000);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) fetchItinerary();
+            });
+
             // 🌌 极光雷达：先把上次成功抓到的数据画出来（秒出），再去拉实时数据覆盖
             if (auroraLoadCache()) renderAuroraAll();
             auroraStart(false);
@@ -3466,23 +3495,106 @@
             loadAuroraOvation().then(() => done(true, '极光概率'), e => done(false, '极光概率', e));
         }
 
-        /* ===== 每日自定义行程：每个 Day 卡片可动态添加/删除行程 ===== */
-        const CUSTOM_ITIN_KEY = 'norway_custom_itinerary_v1';
+        /* ===== 每日自定义行程：可添加可删除 · 全队云端同步 · 按时间插入当天行程 ===== */
+        const ITIN_TABLE = 'itinerary_custom';
+        let itinCloud = !!sb;                            // 云端可用吗？读一次失败就自动降级
+        const CUSTOM_ITIN_KEY   = 'norway_custom_itinerary_v1';   // 本机缓存 / 本机模式存储
+        const ITIN_MIGRATED_KEY = 'norway_itin_migrated_v1';      // 旧本地数据有没有搬上云端
 
-        function loadCustomItin() {
+        // —— 时间解析：把 "D6 下午 14:15" / "上午 10:00" / "晚上 22:00" 变成可比较的数值 ——
+        // 返回 天数*1440+分钟；空时间 = Infinity，排在当天最后。
+        function itinTimeVal(cardKey, label) {
+            if (!label) return Infinity;
+            const numStr = String(cardKey || '').replace(/[^0-9]/g, '');
+            let day = numStr ? parseInt(numStr.charAt(0), 10) : 1;      // 'd67' → 6（卡片的起始天）
+            const dm = label.match(/d\s*(\d+)/i);
+            if (dm) day = parseInt(dm[1], 10);                          // 标签自带 D6 / D7 前缀
+            let mins = Infinity;
+            const tm = label.match(/(\d{1,2})\s*[:：点时]\s*(\d{1,2})?/);
+            if (tm) {
+                const h = parseInt(tm[1], 10);
+                const m = tm[2] ? parseInt(tm[2], 10) : 0;
+                if (h <= 23 && m <= 59) mins = h * 60 + m;              // "10:30" / "14点"
+            }
+            if (mins === Infinity) {
+                const parts = [['凌晨', 0], ['早晨', 7], ['早上', 8], ['上午', 8], ['中午', 12],
+                               ['午后', 13], ['下午', 14], ['黄昏', 17], ['傍晚', 17],
+                               ['晚上', 19], ['晚间', 19], ['夜里', 21], ['夜间', 21], ['深夜', 23]];
+                for (const [w, h] of parts) { if (label.indexOf(w) !== -1) { mins = h * 60; break; } }
+            }
+            return day * 1440 + (mins === Infinity ? 1439 : mins);
+        }
+
+        // 旧版 D6-7 是一张合并卡片，行程存在 'd67' 下；拆分成两张卡片后，
+        // 这类旧数据统一归到 D6（起始日），免得悄悄消失。
+        function normItinKey(k) {
+            return String(k || '').trim().toLowerCase() === 'd67' ? 'd6' : String(k || '').trim();
+        }
+
+        function readLocalItin() {
             try {
                 const raw = localStorage.getItem(CUSTOM_ITIN_KEY);
-                if (raw) { const parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') return parsed; }
-            } catch (e) { /* 坏数据时回落到默认值 */ }
-            // 首次使用时的默认内容：D2（2.21）海钓
-            return {
-                d2: [{ id: 'seed-fishing', time: '', text: '出海海钓：跟随当地渔船出海垂钓，收获属于罗弗敦的渔获。' }]
-            };
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        const out = {};
+                        Object.keys(parsed).forEach(k => {
+                            const nk = normItinKey(k);
+                            if (!Array.isArray(out[nk])) out[nk] = [];
+                            out[nk].push.apply(out[nk], Array.isArray(parsed[k]) ? parsed[k] : []);
+                        });
+                        return out;
+                    }
+                }
+            } catch (e) { /* 坏数据就当没有 */ }
+            // 完全没连过云端、也从来没存过 → 显示默认的 2.21 海钓
+            return { d2: [{ id: 'seed-fishing', time: '', text: '出海海钓：跟随当地渔船出海垂钓，收获属于罗弗敦的渔获。', created_by: null }] };
         }
-        let customItin = loadCustomItin();
-
-        function saveCustomItin() {
+        function writeLocalItin() {
             try { localStorage.setItem(CUSTOM_ITIN_KEY, JSON.stringify(customItin)); } catch (e) {}
+        }
+        let customItin = readLocalItin();   // 先用本机缓存秒渲染，云端回来再覆盖
+
+        // 云端行 → { d1: [{id, time, text, created_by}], ... }
+        function itinFromRows(rows) {
+            const map = {};
+            (rows || []).forEach(r => {
+                const k = normItinKey(r.day_key);
+                if (!k) return;
+                if (!Array.isArray(map[k])) map[k] = [];
+                map[k].push({ id: String(r.id), time: (r.time_label || '').trim(), text: r.content, created_by: r.created_by || null });
+            });
+            return map;
+        }
+
+        function setItinSyncBadge(cloud) {
+            const el = document.getElementById('itin-sync-badge');
+            if (!el) return;
+            if (cloud) {
+                el.textContent = '☁️ 云端同步 · 全队共享';
+                el.title = '自定义行程存在 Supabase，三个人看到的是同一份。';
+                el.className = 'sync-badge ok';
+            } else {
+                el.textContent = '📴 本机模式 · 未连接云端';
+                el.title = '云端表还没建好或网络不通，自定义行程只保存在这台设备上。'
+                         + '把同目录的 supabase_itinerary_setup.sql 在 Supabase SQL Editor 里跑一次即可开启同步。';
+                el.className = 'sync-badge offline';
+            }
+        }
+
+        function itinSchemaHint(err) {
+            const msg = (err && err.message) || '';
+            if (err && (err.code === 'PGRST205' || /could not find the table|does not exist/i.test(msg))) {
+                return '数据库里还没有 itinerary_custom 表。\n\n'
+                     + '请让队长在 Supabase → SQL Editor 里跑一次同目录的 supabase_itinerary_setup.sql（第 1~4 节）。';
+            }
+            return msg;
+        }
+
+        function renderAllItin() {
+            document.querySelectorAll('#section-itinerary .day-card').forEach(card => {
+                renderDayCustom(itinKeyFor(card), card.querySelector('.day-body'));
+            });
         }
 
         // 用卡片上的 D1/D2…/D6-7 编号生成稳定的存储 key（D6-7 → d67）
@@ -3497,32 +3609,56 @@
             return null;
         }
 
-        // 把某天的自定义行程渲染进 day-body（虚线高亮块，可删除）
+        function buildCustomItinNode(key, item) {
+            const box = document.createElement('div');
+            box.className = 'itin-custom';
+            const h = document.createElement('h4');
+            h.textContent = '🕒 ' + (item.time || '新增行程');
+            const badge = document.createElement('span');
+            badge.className = 'itin-badge';
+            badge.textContent = item.created_by ? ('自定义 · ' + item.created_by) : '自定义';
+            h.appendChild(badge);
+            const p = document.createElement('p');
+            p.textContent = item.text;
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'itin-del';
+            del.textContent = '✕';
+            del.title = '删除这条自定义行程（全队都会看不到）';
+            del.onclick = () => deleteCustomItin(key, item.id);
+            box.appendChild(h);
+            box.appendChild(p);
+            box.appendChild(del);
+            return box;
+        }
+
+        // 把某天的自定义行程按时间插进 day-body 的正确位置（虚线高亮块，可删除）
         function renderDayCustom(key, body) {
             if (!body) return;
             body.querySelectorAll('.itin-custom').forEach(n => n.remove());
-            const list = Array.isArray(customItin[key]) ? customItin[key] : [];
+            const list = (Array.isArray(customItin[key]) ? customItin[key] : []).slice()
+                .sort((a, b) => (itinTimeVal(key, a.time) - itinTimeVal(key, b.time))
+                    || (String(a.id) < String(b.id) ? -1 : 1));
+            if (!list.length) return;
+
+            // 静态行程的时间锚点：每个 h4 开头一段；没有 h4 的裸 p（如 D8）视作排在最后
+            const anchors = [];
+            let sawH4 = false;
+            Array.from(body.children).forEach(node => {
+                if (node.tagName === 'H4') {
+                    sawH4 = true;
+                    anchors.push({ node: node, val: itinTimeVal(key, node.textContent) });
+                } else if (node.tagName === 'P' && !sawH4) {
+                    anchors.push({ node: node, val: Infinity });
+                }
+            });
+
             list.forEach(item => {
-                const box = document.createElement('div');
-                box.className = 'itin-custom';
-                const h = document.createElement('h4');
-                h.textContent = '🕒 ' + (item.time || '新增行程');
-                const badge = document.createElement('span');
-                badge.className = 'itin-badge';
-                badge.textContent = '自定义';
-                h.appendChild(badge);
-                const p = document.createElement('p');
-                p.textContent = item.text;
-                const del = document.createElement('button');
-                del.type = 'button';
-                del.className = 'itin-del';
-                del.textContent = '✕';
-                del.title = '删除这条自定义行程';
-                del.onclick = () => deleteCustomItin(key, item.id);
-                box.appendChild(h);
-                box.appendChild(p);
-                box.appendChild(del);
-                body.appendChild(box);
+                const box = buildCustomItinNode(key, item);
+                const val = itinTimeVal(key, item.time);
+                const anchor = anchors.find(a => a.val > val);   // 插到第一条更晚的静态行程前面
+                if (anchor) body.insertBefore(box, anchor.node);
+                else body.appendChild(box);
             });
         }
 
@@ -3536,26 +3672,116 @@
             }
         }
 
-        function addCustomItin(key, timeInput, textInput, form) {
+        async function addCustomItin(key, timeInput, textInput, form) {
             const text = (textInput && textInput.value || '').trim();
             if (!text) { if (textInput) textInput.focus(); return; }
             const time = (timeInput && timeInput.value || '').trim();
-            if (!Array.isArray(customItin[key])) customItin[key] = [];
-            customItin[key].push({ id: 'c' + Date.now() + Math.floor(Math.random() * 1000), time: time, text: text });
-            saveCustomItin();
-            const card = findCardByKey(key);
-            if (card) renderDayCustom(key, card.querySelector('.day-body'));
-            if (form) form.classList.remove('active');
-            if (timeInput) timeInput.value = '';
-            if (textInput) textInput.value = '';
+
+            const me = getIdentity();
+            if (!me) { alert('请先认领你的身份。'); showIdentityGate(); return; }
+
+            if (sb && itinCloud) {
+                const { error } = await sb.from(ITIN_TABLE)
+                    .insert([{ day_key: key, time_label: time, content: text, created_by: me }]);
+                if (error) {
+                    console.error('添加自定义行程失败:', error.message);
+                    alert('添加失败：' + itinSchemaHint(error));
+                    return;   // 失败时保留输入框内容，别把队友打的字弄丢
+                }
+                if (form) form.classList.remove('active');
+                if (timeInput) timeInput.value = '';
+                if (textInput) textInput.value = '';
+                await fetchItinerary();
+            } else {
+                if (!Array.isArray(customItin[key])) customItin[key] = [];
+                customItin[key].push({ id: 'L' + Date.now(), time: time, text: text, created_by: me });
+                writeLocalItin();
+                const card = findCardByKey(key);
+                if (card) renderDayCustom(key, card.querySelector('.day-body'));
+                if (form) form.classList.remove('active');
+                if (timeInput) timeInput.value = '';
+                if (textInput) textInput.value = '';
+            }
         }
 
-        function deleteCustomItin(key, id) {
-            if (!Array.isArray(customItin[key])) return;
-            customItin[key] = customItin[key].filter(i => i.id !== id);
-            saveCustomItin();
-            const card = findCardByKey(key);
-            if (card) renderDayCustom(key, card.querySelector('.day-body'));
+        async function deleteCustomItin(key, id) {
+            const list = Array.isArray(customItin[key]) ? customItin[key] : [];
+            const item = list.find(x => String(x.id) === String(id));
+            if (!item) return;
+            if (!confirm(`确定把「${item.text}」从这天的行程里删掉吗？\n删了之后全队都看不到了。`)) return;
+
+            if (sb && itinCloud) {
+                const { error } = await sb.from(ITIN_TABLE).delete().eq('id', id);
+                if (error) {
+                    console.error('删除自定义行程失败:', error.message);
+                    alert('删除失败：' + error.message);
+                    return;
+                }
+                await fetchItinerary();
+            } else {
+                customItin[key] = list.filter(x => String(x.id) !== String(id));
+                writeLocalItin();
+                const card = findCardByKey(key);
+                if (card) renderDayCustom(key, card.querySelector('.day-body'));
+            }
+        }
+
+        async function fetchItinerary() {
+            if (!sb || !itinCloud) {
+                setItinSyncBadge(false);
+                renderAllItin();
+                return;
+            }
+            const { data, error } = await sb.from(ITIN_TABLE).select('*').order('id', { ascending: true });
+            if (error) {
+                // 表还没建好 / 没权限 / 断网 —— 降级成本机模式，别让这一块看着像坏了
+                console.warn('读取云端自定义行程失败，已切到本机模式:', error.message);
+                itinCloud = false;
+                setItinSyncBadge(false);
+                renderAllItin();
+                return;
+            }
+            setItinSyncBadge(true);
+            customItin = itinFromRows(data || []);
+            writeLocalItin();   // 顺手缓存到本机，断网时打开还能看到最后的样子
+            renderAllItin();
+        }
+
+        // 老版本把自定义行程只存在 localStorage；连上云端后搬一次家
+        // （海钓那条 SQL 脚本里已经预置，跳过不搬，避免重复）
+        async function migrateLocalItin() {
+            if (!sb || !itinCloud) return;
+            let done = false;
+            try { done = localStorage.getItem(ITIN_MIGRATED_KEY) === 'ok'; } catch (e) {}
+            if (done) return;
+
+            const local = readLocalItin();
+            const rows = [];
+            Object.keys(local).forEach(k => (local[k] || []).forEach(it => {
+                if (it.id === 'seed-fishing') return;
+                if (it.text) rows.push({ day_key: k, time_label: (it.time || '').trim(), content: it.text });
+            }));
+            if (!rows.length) {
+                try { localStorage.setItem(ITIN_MIGRATED_KEY, 'ok'); } catch (e) {}
+                return;
+            }
+            const { error } = await sb.from(ITIN_TABLE).insert(rows);
+            if (error) {
+                console.warn('本地自定义行程搬家失败（下次打开页面会再试一次）:', error.message);
+            } else {
+                try { localStorage.setItem(ITIN_MIGRATED_KEY, 'ok'); } catch (e) {}
+                await fetchItinerary();
+            }
+        }
+
+        function subscribeItinRealtime() {
+            if (!sb || !itinCloud) return;
+            // 表没加进 supabase_realtime 发布就不生效，此时靠轮询兜底
+            sb.channel('public:itinerary_custom')
+                .on('postgres_changes', { event: '*', schema: 'public', table: ITIN_TABLE }, () => {
+                    fetchItinerary();
+                })
+                .subscribe();
         }
 
         // 给每个 Day 卡片注入 “＋ 添加行程” 按钮和输入表单
