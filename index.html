@@ -769,6 +769,72 @@
         .day-body h4 { color: var(--pink-accent); font-size: 0.92em; margin: 10px 0 3px; font-weight: 700; }
         .day-body p { color: var(--text-sub); font-size: 0.92em; }
 
+        /* 每日自定义行程（“＋ 添加行程”按钮） */
+        .itin-add-row { margin-top: 14px; }
+        .itin-add-btn {
+            background: transparent;
+            border: 1px dashed var(--pink-accent);
+            color: var(--pink-accent);
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.82em;
+            cursor: pointer;
+            opacity: 0.85;
+            transition: all 0.2s ease;
+        }
+        .itin-add-btn:hover { background: rgba(157, 78, 221, 0.12); opacity: 1; }
+        .itin-form { display: none; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .itin-form.active { display: flex; }
+        .itin-form input {
+            background: rgba(9, 10, 15, 0.7);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            font-size: 0.9em;
+        }
+        .itin-form input:focus { border-color: var(--blue-accent); }
+        .itin-form .itin-time-input { flex: 0 1 170px; }
+        .itin-form .itin-text-input { flex: 1 1 220px; }
+        .itin-form .itin-submit { padding: 9px 18px; font-size: 0.9em; }
+        .itin-custom {
+            position: relative;
+            border: 1px dashed rgba(157, 78, 221, 0.55);
+            border-left: 3px solid var(--pink-accent);
+            border-radius: var(--radius-sm);
+            background: rgba(157, 78, 221, 0.08);
+            padding: 10px 40px 10px 12px;
+            margin-top: 12px;
+        }
+        .itin-custom h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 3px; }
+        .itin-badge {
+            background: rgba(0, 240, 255, 0.12);
+            color: var(--blue-accent);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 700;
+        }
+        .itin-del {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-sub);
+            border-radius: var(--radius-sm);
+            width: 24px;
+            height: 24px;
+            line-height: 1;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+        .itin-del:hover { border-color: var(--pink-accent); color: var(--pink-accent); }
+
         /* 避坑与联系电话 */
         .tips-card { border-left: 4px solid var(--pink-accent); }
         .tip-item h5 { color: var(--pink-accent); font-size: 1em; margin: 12px 0 4px; font-weight: 700; }
@@ -1433,7 +1499,7 @@
                 <div class="day-content">
                     <div class="day-header">
                         <div class="day-title">享用海鲜盛宴 · 生日派对</div>
-                        <div class="day-tag">🐟 亨尼斯韦尔 ➔ 斯沃尔韦尔</div>
+                        <div class="day-tag">🐟 亨尼斯韦尔 </div>
                     </div>
                     <div class="day-body">
                         <h4>🕒 上午 10:30</h4>
@@ -1453,13 +1519,13 @@
                 <div class="day-content">
                     <div class="day-header">
                         <div class="day-title">海路北上 · 海运邮轮探密峡湾</div>
-                        <div class="day-tag">🚢 海上邮轮之旅</div>
+                        <div class="day-tag">🚢 亨尼斯韦尔 ➔ 斯沃尔韦尔</div>
                     </div>
                     <div class="day-body">
                         <h4>🕒 上午 10:00</h4>
-                        <p>返回斯沃尔韦尔，加满油并清洗车辆后还车，准备乘坐夜间海路前往下一个目的地。</p>
+                        <p>尽早退房返回斯沃尔韦尔，避免暴风雪的影响导致封路。</p>
                         <h4>🕒 晚上 22:00</h4>
-                        <p>乘坐挪威沿海邮轮（Hurtigruten / Havila）沿挪威海北上，欣赏甲板两侧拔地而起的雪山峡湾奇景。</p>
+                        <p>加满油还车，乘坐挪威沿海邮轮（Hurtigruten / Havila）沿挪威海北上，欣赏甲板两侧拔地而起的雪山峡湾奇景。</p>
                     </div>
                 </div>
             </div>
@@ -3400,10 +3466,151 @@
             loadAuroraOvation().then(() => done(true, '极光概率'), e => done(false, '极光概率', e));
         }
 
+        /* ===== 每日自定义行程：每个 Day 卡片可动态添加/删除行程 ===== */
+        const CUSTOM_ITIN_KEY = 'norway_custom_itinerary_v1';
+
+        function loadCustomItin() {
+            try {
+                const raw = localStorage.getItem(CUSTOM_ITIN_KEY);
+                if (raw) { const parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') return parsed; }
+            } catch (e) { /* 坏数据时回落到默认值 */ }
+            // 首次使用时的默认内容：D2（2.21）海钓
+            return {
+                d2: [{ id: 'seed-fishing', time: '', text: '出海海钓：跟随当地渔船出海垂钓，收获属于罗弗敦的渔获。' }]
+            };
+        }
+        let customItin = loadCustomItin();
+
+        function saveCustomItin() {
+            try { localStorage.setItem(CUSTOM_ITIN_KEY, JSON.stringify(customItin)); } catch (e) {}
+        }
+
+        // 用卡片上的 D1/D2…/D6-7 编号生成稳定的存储 key（D6-7 → d67）
+        function itinKeyFor(card) {
+            const numEl = card.querySelector('.d-num');
+            const num = numEl ? numEl.textContent.trim().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+            return 'd' + num.replace(/^d/, '');
+        }
+        function findCardByKey(key) {
+            const cards = document.querySelectorAll('#section-itinerary .day-card');
+            for (const c of cards) { if (itinKeyFor(c) === key) return c; }
+            return null;
+        }
+
+        // 把某天的自定义行程渲染进 day-body（虚线高亮块，可删除）
+        function renderDayCustom(key, body) {
+            if (!body) return;
+            body.querySelectorAll('.itin-custom').forEach(n => n.remove());
+            const list = Array.isArray(customItin[key]) ? customItin[key] : [];
+            list.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'itin-custom';
+                const h = document.createElement('h4');
+                h.textContent = '🕒 ' + (item.time || '新增行程');
+                const badge = document.createElement('span');
+                badge.className = 'itin-badge';
+                badge.textContent = '自定义';
+                h.appendChild(badge);
+                const p = document.createElement('p');
+                p.textContent = item.text;
+                const del = document.createElement('button');
+                del.type = 'button';
+                del.className = 'itin-del';
+                del.textContent = '✕';
+                del.title = '删除这条自定义行程';
+                del.onclick = () => deleteCustomItin(key, item.id);
+                box.appendChild(h);
+                box.appendChild(p);
+                box.appendChild(del);
+                body.appendChild(box);
+            });
+        }
+
+        function toggleItinForm(key) {
+            const form = document.getElementById('itin-form-' + key);
+            if (!form) return;
+            const showing = form.classList.toggle('active');
+            if (showing) {
+                const t = form.querySelector('.itin-text-input');
+                if (t) t.focus();
+            }
+        }
+
+        function addCustomItin(key, timeInput, textInput, form) {
+            const text = (textInput && textInput.value || '').trim();
+            if (!text) { if (textInput) textInput.focus(); return; }
+            const time = (timeInput && timeInput.value || '').trim();
+            if (!Array.isArray(customItin[key])) customItin[key] = [];
+            customItin[key].push({ id: 'c' + Date.now() + Math.floor(Math.random() * 1000), time: time, text: text });
+            saveCustomItin();
+            const card = findCardByKey(key);
+            if (card) renderDayCustom(key, card.querySelector('.day-body'));
+            if (form) form.classList.remove('active');
+            if (timeInput) timeInput.value = '';
+            if (textInput) textInput.value = '';
+        }
+
+        function deleteCustomItin(key, id) {
+            if (!Array.isArray(customItin[key])) return;
+            customItin[key] = customItin[key].filter(i => i.id !== id);
+            saveCustomItin();
+            const card = findCardByKey(key);
+            if (card) renderDayCustom(key, card.querySelector('.day-body'));
+        }
+
+        // 给每个 Day 卡片注入 “＋ 添加行程” 按钮和输入表单
+        function initCustomItinerary() {
+            document.querySelectorAll('#section-itinerary .day-card').forEach(card => {
+                const key = itinKeyFor(card);
+                const content = card.querySelector('.day-content');
+                const body = card.querySelector('.day-body');
+                if (!content || !body) return;
+
+                const addRow = document.createElement('div');
+                addRow.className = 'itin-add-row';
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.className = 'itin-add-btn';
+                addBtn.textContent = '＋ 添加行程';
+                addBtn.onclick = () => toggleItinForm(key);
+                addRow.appendChild(addBtn);
+
+                const form = document.createElement('div');
+                form.className = 'itin-form';
+                form.id = 'itin-form-' + key;
+                const timeInput = document.createElement('input');
+                timeInput.type = 'text';
+                timeInput.maxLength = 20;
+                timeInput.className = 'itin-time-input';
+                timeInput.placeholder = '时间（可留空，如 上午 10:00）';
+                const textInput = document.createElement('input');
+                textInput.type = 'text';
+                textInput.maxLength = 120;
+                textInput.className = 'itin-text-input';
+                textInput.placeholder = '行程内容，如：出海海钓 3 小时';
+                const submit = document.createElement('button');
+                submit.type = 'button';
+                submit.className = 'btn-glow itin-submit';
+                submit.textContent = '添加';
+                const submitNow = () => addCustomItin(key, timeInput, textInput, form);
+                timeInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitNow(); } });
+                textInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitNow(); } });
+                submit.onclick = submitNow;
+                form.appendChild(timeInput);
+                form.appendChild(textInput);
+                form.appendChild(submit);
+
+                content.appendChild(addRow);
+                content.appendChild(form);
+                renderDayCustom(key, body);
+            });
+        }
+
         // 初始化运行
         document.addEventListener('DOMContentLoaded', () => {
             initNavMenu();
             buildEmojiPanel();
+            initCustomItinerary();
 
             updateDashboard();
             setInterval(updateDashboard, 1000);
